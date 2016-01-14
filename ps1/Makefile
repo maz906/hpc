@@ -11,7 +11,7 @@ LIBRARIES =
 all: qsort test clean
 
 qsort: 
-	$(CC) $(CFLAGS) -o $(BIN)/qsort $(SOURCE)/qsort.c -I$(INCLUDE_PATH) -L$(LIBRARY_PATH) $(addprefix -l, $(LIBRARIES))
+	$(CC) $(CFLAGS) -c -o $(BIN)/qsort $(SOURCE)/qsort.c -I$(INCLUDE_PATH) -L$(LIBRARY_PATH) $(addprefix -l, $(LIBRARIES))
 
 test: $(BIN)/qsort.o
 	$(CC) $(CFLAGS) -o $(BIN)/test_qsort $(TEST)/test.c $(BIN)/qsort.o -I$(INCLUDE_PATH) -L$(LIBRARY_PATH) $(addprefix -l, $(LIBRARIES))

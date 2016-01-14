@@ -1,10 +1,7 @@
 #include "qsort.h"
 #include "stddef.h"
-
-int main(int argc, char** argv) 
-{
-
-}
+#include "stdlib.h"
+#include "string.h"
 
 /*
  * base - pointer to the first object of the array to be sorted
@@ -17,38 +14,35 @@ void qsort(void* base, size_t num, size_t size,
 {
 
 	//singleton array, so we are done
-	if (num <= 1)
-		return;	
+	if (num <= 1) return;	
 	
 	//pivot
-	void* pivot = base + (num - 1);
+	void* pivot = base + size*(num - 1);
 
 	//partition the array
-	size_t left_array = 0;
-	size_t right_array = 0;
+	size_t swappable = 0;
 
 	for (size_t i = 0; i < num; ++i)
 	{
-		if (compar(base + i, pivot) > 0)
+		if (compar(base + size*i, pivot) < 0) 
 		{
-			right_array++;
-		}
-		else if (compar(base + i, pivot) < 0) 
-		{
-			left_array++;		
-			swap(base + i, base + right_array);
+			//if smaller than pivot, switch i with wherever the most recent larger than element is
+			swap(base + size*(swappable++), base + size*i, size);
 		}
 	}
 
 	//put the pivot in the right place	
-	swap(pivot, base + right_array + 1);
-	qsort(base, num/2, size, compar);
-	qsort(base + num/2, num/2, size, compar);
+	swap(pivot, base + size*(swappable), size);
+
+	//sort the other two arrays.
+	qsort(base, swappable, size, compar);
+	qsort(base + size*(swappable + 1), num - swappable - 1, size, compar);
 }
 
-void swap(void* source, void* dest) 
+void swap(void* source, void* dest, size_t size) 
 {
-	void* temp = source;
-	source = dest;
-	dest = temp;
+	void* temp = calloc(1, size);
+	memcpy(temp, source, size);
+	memcpy(source, dest, size);
+	memcpy(dest, temp, size);
 }
