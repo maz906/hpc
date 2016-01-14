@@ -10,8 +10,11 @@
 
 int main(int argv, char** argc) 
 {
-	test_swap(1000);
-	basic_test(1000, 100000);
+	int test_times = 100;
+	int max_size = 1000000;
+	int increment = 20000;
+	test_swap(test_times);
+	basic_test(test_times, max_size, increment);
 }
 
 
@@ -29,6 +32,7 @@ void test_swap(int times)
 {
 	time_t t;
 	srand((unsigned) time(&t));
+	#pragma omp parallel for
 	for (size_t i = 0; i < times; ++i)
 	{
 		int a = rand();
@@ -43,19 +47,31 @@ void test_swap(int times)
 	}
 }
 
-void basic_test(int times, int size) 
+void basic_test(int times, int size, int increment) 
 {
-	#pragma omp parallel for
 	for (int i = 0; i < times; ++i)
 	{
-		for (int j = 0; j < size; j += 1000)
+		#pragma omp parallel for
+		for (int j = 0; j < size; j += increment)
 		{
-			test_array(random_int_array(size), size, sizeof(int), *compar_int);
-			test_array(random_double_array(size), size, sizeof(double), *compar_double);
-			test_array(random_float_array(size), size, sizeof(float), *compar_float);
-			//TODO: the long test segfaults
-			test_array(random_long_array(size), size, sizeof(long), *compar_long);
-			test_array(random_point_array(size), size, sizeof(Point), *compar_point);
+			printf("Testing problem size: %d\n", j);
+
+			int* intarr = random_int_array(size);
+			double* doublearr = random_double_array(size);
+			float* floatarr = random_float_array(size);
+			long* longarr = random_long_array(size);
+			Point* pointarr = random_point_array(size);
+
+			test_array(intarr, size, sizeof(int), *compar_int);
+			free(intarr);
+			test_array(doublearr, size, sizeof(double), *compar_double);
+			free(doublearr);
+			test_array(floatarr, size, sizeof(float), *compar_float);
+			free(floatarr);
+			test_array(longarr, size, sizeof(long), *compar_long);
+			free(longarr);
+			test_array(pointarr, size, sizeof(Point), *compar_point);
+			free(pointarr);
 		}
 	}
 }
@@ -66,6 +82,7 @@ void test_array(void* arri_1, size_t num, size_t size, int (*compar) (const void
 	my_qsort(arri_1, num, size, compar);
 	qsort(arri_2, num, size, compar);	
 	assert(are_equal(arri_1, arri_2, num, size, compar));
+	free(arri_2);
 }
 
 bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(const void*, const void*))
@@ -184,15 +201,16 @@ float* random_float_array(size_t size)
 Point* random_point_array(size_t size)
 {
 	Point* arr = (Point*) calloc(size, sizeof(Point));
+	Point* p = calloc(1, sizeof(Point));
 	time_t t;
 	srand((unsigned) time(&t));
 	for (size_t i = 0; i < size; ++i) 
 	{
-		Point* p = calloc(1, sizeof(Point));
 		int random = rand() % 100000;
 		p->x = random + (random/(double)(1 + (rand() % 100)));
 		p->y = random + (random/(double)(1 + (rand() % 100)));
 		arr[i] = *p; 
 	}
+	free(p);
 	return arr;
 }

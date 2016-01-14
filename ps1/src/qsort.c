@@ -45,4 +45,5 @@ void swap(void* source, void* dest, size_t size)
 	memcpy(temp, source, size);
 	memcpy(source, dest, size);
 	memcpy(dest, temp, size);
+	free(temp);
 }
