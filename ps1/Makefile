@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -O4
 ROOT = .
 INCLUDE_PATH = $(ROOT)/include
 LIBRARY_PATH = $(ROOT)/lib

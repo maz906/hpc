@@ -9,7 +9,7 @@
  * size - size in bytes of each element of the array
  * compar - pointer to function that compares two elements  
  */
-void qsort(void* base, size_t num, size_t size,
+void my_qsort(void* base, size_t num, size_t size,
 						int (*compar)(const void*, const void*))
 {
 
