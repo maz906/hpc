@@ -10,8 +10,13 @@
 
 int main(int argv, char** argc) 
 {
-	test_swap(1000);
-	basic_test(1000, 100000);
+	if (argv != 3)
+	{
+		printf("Usage: ./test_qsort [iterations] [max_problem_size]\n");
+		return;
+	}
+	test_swap(atoi(argc[1]));
+	basic_test(atoi(argc[1]), atoi(argc[2]));
 }
 
 
@@ -45,27 +50,50 @@ void test_swap(int times)
 
 void basic_test(int times, int size) 
 {
-	#pragma omp parallel for
-	for (int i = 0; i < times; ++i)
+	int i, j;
+	double int_time = 0, double_time = 0, float_time = 0, long_time = 0, point_time = 0;
+	double int_time_single, double_time_single, long_time_single, point_time_single, float_time_single;
+	for (j = 1000; j < size; j += 1000)
 	{
-		for (int j = 0; j < size; j += 1000)
+		#pragma omp parallel for
+		for (i = 0; i < times; ++i)
 		{
-			test_array(random_int_array(size), size, sizeof(int), *compar_int);
-			test_array(random_double_array(size), size, sizeof(double), *compar_double);
-			test_array(random_float_array(size), size, sizeof(float), *compar_float);
-			//TODO: the long test segfaults
-			test_array(random_long_array(size), size, sizeof(long), *compar_long);
-			test_array(random_point_array(size), size, sizeof(Point), *compar_point);
+			int_time_single = test_array(random_int_array(j), size, sizeof(int), *compar_int);
+			double_time_single = test_array(random_double_array(j), size, sizeof(double), *compar_double);
+			float_time_single = test_array(random_float_array(j), size, sizeof(float), *compar_float);
+			long_time_single = test_array(random_long_array(j), size, sizeof(long), *compar_long);
+			point_time_single = test_array(random_point_array(j), size, sizeof(Point), *compar_point);
+
+			#pragma omp atomic
+			int_time += int_time_single;
+			#pragma omp atomic
+			double_time += double_time_single;
+			#pragma omp atomic
+			long_time += long_time_single;
+			#pragma omp atomic
+			float_time += float_time_single;
+			#pragma omp atomic
+			point_time += point_time_single;
 		}
+		printf("(int) array_size: %d, sort_time: %f", j, int_time/times);
+		printf("(double) array_size: %d, sort_time: %f", j, double_time/times);
+		printf("(float) array_size: %d, sort_time: %f", j, float_time/times);
+		printf("(long) array_size: %d, sort_time: %f", j, long_time/times);
+		printf("(point) array_size: %d, sort_time: %f", j, point_time/times);
+		int_time = double_time = float_time = long_time = point_time = 0;
 	}
 }
 
-void test_array(void* arri_1, size_t num, size_t size, int (*compar) (const void*, const void*)) 
+double test_array(void* arri_1, size_t num, size_t size, int (*compar) (const void*, const void*)) 
 {
 	void* arri_2 = duplicate_array(arri_1, num, size);
+	clock_t difference;	
+	clock_t start = clock();
 	my_qsort(arri_1, num, size, compar);
+	difference = clock() - start;	
 	qsort(arri_2, num, size, compar);	
 	assert(are_equal(arri_1, arri_2, num, size, compar));
+	return difference * 1000/CLOCKS_PER_SEC;
 }
 
 bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(const void*, const void*))

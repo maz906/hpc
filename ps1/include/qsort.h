@@ -24,4 +24,4 @@ void test_swap(int times);
 bool is_ordered(void* base, size_t num, size_t size, int (*compar)(const void*, const void*));
 bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar) (const void*, const void*));
 void* duplicate_array(void* arr, size_t num, size_t size);
-void test_array(void* arr, size_t num, size_t size, int (*compar) (const void*, const void*));
+double test_array(void* arr, size_t num, size_t size, int (*compar) (const void*, const void*));
