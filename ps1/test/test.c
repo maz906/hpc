@@ -12,11 +12,11 @@ int main(int argv, char** argc)
 {
 	if (argv != 3)
 	{
-		printf("Usage: ./test_qsort [iterations] [max_problem_size]\n");
-		return;
+		printf("Usage: ./test_qsort [iterations] [max_problem_size] [increment_step]\n");
+		return 1;
 	}
 	test_swap(atoi(argc[1]));
-	basic_test(atoi(argc[1]), atoi(argc[2]));
+	basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
 }
 
 
@@ -34,6 +34,7 @@ void test_swap(int times)
 {
 	time_t t;
 	srand((unsigned) time(&t));
+	#pragma omp parallel for
 	for (size_t i = 0; i < times; ++i)
 	{
 		int a = rand();
@@ -48,12 +49,12 @@ void test_swap(int times)
 	}
 }
 
-void basic_test(int times, int size) 
+void basic_test(int times, int size, int increment) 
 {
 	int i, j;
 	double int_time = 0, double_time = 0, float_time = 0, long_time = 0, point_time = 0;
 	double int_time_single, double_time_single, long_time_single, point_time_single, float_time_single;
-	for (j = 1000; j < size; j += 1000)
+	for (j = 0; j < size; j += increment)
 	{
 		#pragma omp parallel for
 		for (i = 0; i < times; ++i)
@@ -93,6 +94,7 @@ double test_array(void* arri_1, size_t num, size_t size, int (*compar) (const vo
 	difference = clock() - start;	
 	qsort(arri_2, num, size, compar);	
 	assert(are_equal(arri_1, arri_2, num, size, compar));
+	free(arri_2);
 	return difference * 1000/CLOCKS_PER_SEC;
 }
 
@@ -212,15 +214,16 @@ float* random_float_array(size_t size)
 Point* random_point_array(size_t size)
 {
 	Point* arr = (Point*) calloc(size, sizeof(Point));
+	Point* p = calloc(1, sizeof(Point));
 	time_t t;
 	srand((unsigned) time(&t));
 	for (size_t i = 0; i < size; ++i) 
 	{
-		Point* p = calloc(1, sizeof(Point));
 		int random = rand() % 100000;
 		p->x = random + (random/(double)(1 + (rand() % 100)));
 		p->y = random + (random/(double)(1 + (rand() % 100)));
 		arr[i] = *p; 
 	}
+	free(p);
 	return arr;
 }

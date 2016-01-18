@@ -1,3 +1,4 @@
+#pragma once
 #include "stddef.h"
 #include "stdbool.h"
 
@@ -19,7 +20,7 @@ int compar_double(const double*, const double*);
 int compar_long(const long*, const long*);
 int compar_float(const float*, const float*);
 int compar_point(const Point*, const Point*);
-void basic_test(int times, int size);
+void basic_test(int times, int size, int increment);
 void test_swap(int times);
 bool is_ordered(void* base, size_t num, size_t size, int (*compar)(const void*, const void*));
 bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar) (const void*, const void*));
