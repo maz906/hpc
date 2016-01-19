@@ -7,7 +7,6 @@ typedef struct _Point {
 	double y;
 } Point;
 
-void swap (void* source, void* dest, size_t size);
 void my_qsort (void* base, size_t num, size_t size, int (*compar)(const void*,const void*));
 
 int* random_int_array(size_t);

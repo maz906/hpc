@@ -9,7 +9,8 @@
 
 void print_int_array(int* base, size_t num) 
 {
-	for (size_t i = 0; i < num; ++i) 
+	size_t i;
+	for (i = 0; i < num; ++i) 
 	{
 		printf("%d ", base[i]);
 	}
@@ -23,7 +24,7 @@ int main(int argv, char** argc)
 		printf("Usage: ./test_qsort [iterations] [max_problem_size] [increment_step]\n");
 		return 1;
 	}
-	test_swap(atoi(argc[1]));
+	//test_swap(atoi(argc[1]));
 	basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
 	return 0;
 }
@@ -31,7 +32,8 @@ int main(int argv, char** argc)
 
 bool is_ordered(void* base, size_t num, size_t size, int (*compar)(const void*, const void*))
 {
-	for (size_t i = 0; i < num - 1; ++i)
+	size_t i;
+	for (i = 0; i < num - 1; ++i)
  	{
 		if (compar(((char*)base) + size*i, ((char*)base) + size*(i+1)) > 0)
 			return false;
@@ -39,25 +41,25 @@ bool is_ordered(void* base, size_t num, size_t size, int (*compar)(const void*, 
 	return true;
 }
 
-void test_swap(size_t times) 
-{
-	time_t t;
-	srand((unsigned) time(&t));
-	int i;
-	#pragma omp parallel for
-	for (i = 0; i < times; ++i)
-	{
-		int a = rand();
-		int b = rand();
-		int a_copy = a;
-		int b_copy = b;
-		int* aa = &a;
-		int* bb = &b;	
-		swap(aa, bb, sizeof(int));
-		assert((*aa) == b_copy);
-		assert((*bb) == a_copy);
-	}
-}
+//void test_swap(size_t times) 
+//{
+//	time_t t;
+//	srand((unsigned) time(&t));
+//	int i;
+//	#pragma omp parallel for
+//	for (i = 0; i < times; ++i)
+//	{
+//		int a = rand();
+//		int b = rand();
+//		int a_copy = a;
+//		int b_copy = b;
+//		int* aa = &a;
+//		int* bb = &b;	
+//		swap(aa, bb, sizeof(int));
+//		assert((*aa) == b_copy);
+//		assert((*bb) == a_copy);
+//	}
+//}
 
 void basic_test(size_t times, size_t size, size_t increment) 
 {
@@ -103,7 +105,9 @@ double test_array(void* arri_1, size_t num, size_t size, int (*compar) (const vo
 	clock_t start = clock();
 	my_qsort(arri_1, num, size, compar);
 	difference = clock() - start;	
+	//clock_t start = clock();
 	qsort(arri_2, num, size, compar);	
+	//difference = clock() - start;
 	assert(are_equal(arri_1, arri_2, num, size, compar));
 	free(arri_2);
 	return difference * 1000/CLOCKS_PER_SEC;
@@ -111,7 +115,8 @@ double test_array(void* arri_1, size_t num, size_t size, int (*compar) (const vo
 
 bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(const void*, const void*))
 {
-	for (size_t i = 0; i < num; ++i) 
+	size_t i;
+	for (i = 0; i < num; ++i) 
 	{
 		if (compar(((char*)arr1) + size*i, ((char*)arr2) + size*i) != 0) 
 		{
@@ -183,7 +188,8 @@ int* random_int_array(size_t num)
 	time_t t;
 	srand((unsigned) time(&t));
 	int* arr = (int*) calloc(num, sizeof(int));
-	for (size_t i = 0; i < num; ++i)
+	size_t i;
+	for (i = 0; i < num; ++i)
 	{
 		arr[i] = rand() % 10000;
 	}
@@ -195,7 +201,8 @@ long* random_long_array(size_t num)
 	time_t t;
 	srand((unsigned) time(&t));
 	long* arr = (long*) calloc(num, sizeof(long));
-	for (size_t i = 0; i < num; ++i)
+	size_t i;
+	for (i = 0; i < num; ++i)
 	{
 		int random = rand();
 		long longrand = (( (long) random ) << 16) + rand();
@@ -209,7 +216,8 @@ double* random_double_array(size_t size)
 	time_t t;
 	srand((unsigned) time(&t));
 	double* arr = (double*) calloc(size, sizeof(double));
-	for (size_t i = 0; i < size; ++i)
+	size_t i;
+	for (i = 0; i < size; ++i)
 	{
 		int random = rand() % 25;
 		arr[i] = random + (random/(double)(1 + (rand() % 100)));
@@ -228,7 +236,8 @@ Point* random_point_array(size_t size)
 	Point* p = calloc(1, sizeof(Point));
 	time_t t;
 	srand((unsigned) time(&t));
-	for (size_t i = 0; i < size; ++i) 
+	size_t i;
+	for (i = 0; i < size; ++i) 
 	{
 		int random = rand() % 100000;
 		p->x = random + (random/(double)(1 + (rand() % 100)));

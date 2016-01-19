@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -O4 -fopenmp
+CFLAGS = -Wall -Ofast -fopenmp
 ROOT = .
 INCLUDE_PATH = $(ROOT)/include
 LIBRARY_PATH = $(ROOT)/lib
