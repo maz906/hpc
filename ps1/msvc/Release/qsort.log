@@ -1,0 +1,6 @@
+﻿  qsort.c
+  test.c
+..\test\test.c(46): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
+LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:ICF' specification
+  qsort.vcxproj -> C:\Users\Michael\Github\hpc\ps1\msvc\Release\qsort.exe

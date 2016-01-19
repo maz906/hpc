@@ -1,0 +1,7 @@
+﻿  test.c
+..\test\test.c(48): warning C4018: '<': signed/unsigned mismatch
+..\test\test.c(46): warning C4101: 'i': unreferenced local variable
+..\test\test.c(67): warning C4018: '<': signed/unsigned mismatch
+..\test\test.c(70): warning C4018: '<': signed/unsigned mismatch
+..\test\test.c(64): warning C4101: 'i': unreferenced local variable
+  qsort.vcxproj -> C:\Users\Michael\Github\hpc\ps1\msvc\Debug\qsort.exe

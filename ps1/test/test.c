@@ -7,16 +7,25 @@
 #include "stdbool.h"
 #include "string.h"
 
+void print_int_array(int* base, size_t num) 
+{
+	for (size_t i = 0; i < num; ++i) 
+	{
+		printf("%d ", base[i]);
+	}
+	printf("\n");
+}
 
 int main(int argv, char** argc) 
 {
-	if (argv != 3)
+	if (argv < 4)
 	{
 		printf("Usage: ./test_qsort [iterations] [max_problem_size] [increment_step]\n");
 		return 1;
 	}
 	test_swap(atoi(argc[1]));
 	basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
+	return 0;
 }
 
 
@@ -24,18 +33,19 @@ bool is_ordered(void* base, size_t num, size_t size, int (*compar)(const void*, 
 {
 	for (size_t i = 0; i < num - 1; ++i)
  	{
-		if (compar(base + size*i, base + size*(i+1)) > 0)
+		if (compar(((char*)base) + size*i, ((char*)base) + size*(i+1)) > 0)
 			return false;
   }	
 	return true;
 }
 
-void test_swap(int times) 
+void test_swap(size_t times) 
 {
 	time_t t;
 	srand((unsigned) time(&t));
+	int i;
 	#pragma omp parallel for
-	for (size_t i = 0; i < times; ++i)
+	for (i = 0; i < times; ++i)
 	{
 		int a = rand();
 		int b = rand();
@@ -49,7 +59,7 @@ void test_swap(int times)
 	}
 }
 
-void basic_test(int times, int size, int increment) 
+void basic_test(size_t times, size_t size, size_t increment) 
 {
 	int i, j;
 	double int_time = 0, double_time = 0, float_time = 0, long_time = 0, point_time = 0;
@@ -59,11 +69,11 @@ void basic_test(int times, int size, int increment)
 		#pragma omp parallel for
 		for (i = 0; i < times; ++i)
 		{
-			int_time_single = test_array(random_int_array(j), size, sizeof(int), *compar_int);
-			double_time_single = test_array(random_double_array(j), size, sizeof(double), *compar_double);
-			float_time_single = test_array(random_float_array(j), size, sizeof(float), *compar_float);
-			long_time_single = test_array(random_long_array(j), size, sizeof(long), *compar_long);
-			point_time_single = test_array(random_point_array(j), size, sizeof(Point), *compar_point);
+			int_time_single = test_array(random_int_array(j), j, sizeof(int), *compar_int);
+			double_time_single = test_array(random_double_array(j), j, sizeof(double), *compar_double);
+			float_time_single = test_array(random_float_array(j), j, sizeof(float), *compar_float);
+			long_time_single = test_array(random_long_array(j), j, sizeof(long), *compar_long);
+			point_time_single = test_array(random_point_array(j), j, sizeof(Point), *compar_point);
 
 			#pragma omp atomic
 			int_time += int_time_single;
@@ -76,11 +86,12 @@ void basic_test(int times, int size, int increment)
 			#pragma omp atomic
 			point_time += point_time_single;
 		}
-		printf("(int) array_size: %d, sort_time: %f", j, int_time/times);
-		printf("(double) array_size: %d, sort_time: %f", j, double_time/times);
-		printf("(float) array_size: %d, sort_time: %f", j, float_time/times);
-		printf("(long) array_size: %d, sort_time: %f", j, long_time/times);
-		printf("(point) array_size: %d, sort_time: %f", j, point_time/times);
+		printf("(int) array_size: %d, sort_time (ms): %f\n", j, int_time/times);
+		printf("(double) array_size: %d, sort_time (ms): %f\n", j, double_time/times);
+		printf("(float) array_size: %d, sort_time (ms): %f\n", j, float_time/times);
+		printf("(long) array_size: %d, sort_time (ms): %f\n", j, long_time/times);
+		printf("(point) array_size: %d, sort_time (ms): %f\n", j, point_time/times);
+		printf("\n");
 		int_time = double_time = float_time = long_time = point_time = 0;
 	}
 }
@@ -102,7 +113,7 @@ bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(co
 {
 	for (size_t i = 0; i < num; ++i) 
 	{
-		if (compar(arr1 + size*i, arr2 + size*i) != 0) 
+		if (compar(((char*)arr1) + size*i, ((char*)arr2) + size*i) != 0) 
 		{
 			return false;
 		}
