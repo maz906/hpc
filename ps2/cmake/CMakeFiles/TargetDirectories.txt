@@ -1,0 +1,2 @@
+/home/nazenji/Git/hpc/ps2/cmake/CMakeFiles/test_qsort.dir
+/home/nazenji/Git/hpc/ps2/cmake/CMakeFiles/qsort.dir

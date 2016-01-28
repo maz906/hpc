@@ -1,0 +1,1 @@
+/usr/bin/cc   -fopenmp -std=c99    CMakeFiles/test_qsort.dir/test/qsort_test.c.o  -o ../bin/test_qsort -rdynamic ../bin/libqsort.a 

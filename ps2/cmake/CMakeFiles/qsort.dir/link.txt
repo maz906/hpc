@@ -1,0 +1,2 @@
+/usr/bin/ar cq ../bin/libqsort.a  CMakeFiles/qsort.dir/src/qsort.c.o
+/usr/bin/ranlib ../bin/libqsort.a

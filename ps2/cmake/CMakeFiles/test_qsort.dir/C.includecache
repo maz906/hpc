@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/qsort.h
+stddef.h
+../include/stddef.h
+stdbool.h
+../include/stdbool.h
+
+/home/nazenji/Git/hpc/ps2/test/qsort_test.c
+qsort.h
+/home/nazenji/Git/hpc/ps2/test/qsort.h
+assert.h
+/home/nazenji/Git/hpc/ps2/test/assert.h
+stddef.h
+/home/nazenji/Git/hpc/ps2/test/stddef.h
+stdio.h
+/home/nazenji/Git/hpc/ps2/test/stdio.h
+stdlib.h
+/home/nazenji/Git/hpc/ps2/test/stdlib.h
+time.h
+/home/nazenji/Git/hpc/ps2/test/time.h
+stdbool.h
+/home/nazenji/Git/hpc/ps2/test/stdbool.h
+string.h
+/home/nazenji/Git/hpc/ps2/test/string.h
+
