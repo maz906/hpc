@@ -27,22 +27,8 @@ void my_qsort(void* base, size_t num, size_t size,
 	
 	//pivot
 	void* pivot = (char*)base + size*(num - 1);
-
-	//partition the array: non-parallel
-	//size_t swappable = 0, i;
-	//for (i = 0; i < num; ++i)
-	//{
-	//	if ((*compar)((char*)base + size*i, pivot) < 0) 
-	//	{
-	//		//if smaller than pivot, switch i with wherever the most recent larger than element is
-	//		swap((char*)base + size*(swappable++), (char*)base + size*i, size);
-	//	}
-	//}
 	size_t* swappable;
 	select_lower(base, num, size, pivot, swappable, compar);
-	//put the pivot in the right place	
-	//non-parallel
-	//swap(pivot, (char*)base + size*(swappable), size);
 
 	//sort the other two arrays.
 	#pragma omp parallel sections 
