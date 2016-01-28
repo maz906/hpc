@@ -1,4 +1,6 @@
 #include "qsort.h"
+#include "util.h"
+
 #include "stddef.h"
 #include "stdlib.h"
 #include "string.h"
@@ -44,14 +46,6 @@ void my_qsort(void* base, size_t num, size_t size,
 	}
 }
 
-void* addition(void* a, void*b) 
-{
-	int sum = *(int*)a + *(int*)b;
-	int* toReturn = (int*)calloc(1, sizeof(int));
-	memcpy(toReturn, &sum, sizeof(int));
-	//TODO: fix segfault thrown at this line
-	return toReturn;
-}
 
 void select_lower(void* base, size_t num, size_t size, void* pivot, size_t* swappable, int (*compar)(const void*, const void*))
 {
@@ -65,11 +59,12 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, size_t* swap
 	//not sure this line is the right move
 	memcpy(swappable, scan + (num - 1)*size, size);
 	
+	//TODO: resolve access violation in this loop 
+	//test
 	#pragma omp parallel for
 	for (i = 0; i < num; ++i)
 		if (t[i])
 			swap((char*) base + (*(scan + i*size) - 1)*size, (char*) base + i*size, size);
-
 	swap(pivot, (char*) base + size*(*swappable), size);
 	free(t);
 }
@@ -81,33 +76,33 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, size_t* swap
  * l - size of pointers in the array
  * oper - pointer to function that operates on two elements 
  */
-void* genericScan(void* base, size_t n, size_t l, void*  (*oper)(void *x1, void* x2)) 
+void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void *x1, void* x2)) 
 {	
-	void* scan = calloc(n, l); 
-	if (n == 1) { memcpy(scan, base, l); return scan; }
-	bool isOdd = (n % 2 == 1);
-	int size = isOdd ? (n / 2 + 1) : (n / 2);
-	void* b = calloc(size, l);
+	void* scan = calloc(num, byte_size); 
+	if (num == 1) { memcpy(scan, base, byte_size); return scan; }
+	bool isOdd = (num % 2 == 1);
+	int size = isOdd ? (num / 2 + 1) : (num / 2);
+	void* b = calloc(byte_size, byte_size);
 	int i;
 	#pragma omp parallel for
-	for (i = 0; i < n / 2; ++i)
+	for (i = 0; i < num / 2; ++i)
 	{
-		memcpy((char*)b + i*l, (*oper) ((char*)base + 2 * i*l, (char*)base + (2 * i + 1)*l), l);
+		memcpy((char*)b + i*byte_size, (*oper) ((char*)base + 2 * i*byte_size, (char*)base + (2 * i + 1)*byte_size), byte_size);
 	}
 
 	//edge case if n is odd
-	//if (isOdd)
-	//{
-	//	memcpy((char*)b + (n / 2)*l, (char*)base + 2 * n*l, l);
-	//}
-	void* c = genericScan(b, size, l, oper);
-	memcpy(scan, base, l);	
+	if (isOdd)
+	{
+		memcpy((char*)b + (num / 2)*byte_size, (char*)base + 2 * num*byte_size, byte_size);
+	}
+	void* c = genericScan(b, byte_size, byte_size, oper);
+	memcpy(scan, base, byte_size);	
 	#pragma omp parallel for
-	for (i = 0; i < n; ++i)
+	for (i = 0; i < num; ++i)
 		if (i % 2 == 0)
-			memcpy((char*)scan + i*l, (*oper)((char*)c + (i/2)*l, (char*)base + i*l), l);
+			memcpy((char*)scan + i*byte_size, (*oper)((char*)c + (i/2)*byte_size, (char*)base + i*byte_size), byte_size);
 		else
-			memcpy((char*)scan + i*l, (char*)c + (i/2)*l, l);
+			memcpy((char*)scan + i*byte_size, (char*)c + (i/2)*byte_size, byte_size);
 	free(b);
 	return scan;
 }
