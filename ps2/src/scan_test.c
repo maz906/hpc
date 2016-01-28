@@ -1,3 +1,6 @@
+#include "stdlib.h"
+#include "string.h"
+
 #include "scan_test.h"
 #include "qsort.h"
 #include "util.h"

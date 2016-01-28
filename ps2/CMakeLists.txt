@@ -23,5 +23,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 # add all files ...
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${INC})
 add_library(qsort ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE}/qsort.c)
+add_library(util ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE}/util.c)
 add_executable(test_qsort ${CMAKE_CURRENT_SOURCE_DIR}/${TEST}/qsort_test.c)
-target_link_libraries(test_qsort qsort)
+target_link_libraries(test_qsort qsort util)

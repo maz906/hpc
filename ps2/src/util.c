@@ -1,6 +1,10 @@
 #include "stddef.h"
 #include "stdbool.h"
+#include "stdlib.h"
+#include "string.h"
+
 #include "point.h"
+#include "time.h"
 
 
 void* addition(void* a, void*b) 
