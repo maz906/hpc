@@ -24,9 +24,8 @@ int main(int argv, char** argc)
 		printf("Usage: ./test_qsort [iterations] [max_problem_size] [increment_step]\n");
 		return 1;
 	}
-	//test_swap(atoi(argc[1]));
-	scan_test(atoi(argc[2]));
-	//basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
+	//scan_test(atoi(argc[2]));
+	basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
 	//_CrtDumpMemoryLeaks();
 	return 0;
 }
@@ -39,7 +38,7 @@ void basic_test(size_t times, size_t size, size_t increment)
 	double int_time = 0, double_time = 0, float_time = 0, long_time = 0, point_time = 0;
 	Point int_time_single, double_time_single, long_time_single, point_time_single, float_time_single;
 	double int_time_std = 0, double_time_std = 0, float_time_std = 0, long_time_std = 0, point_time_std = 0;
-	for (j = 0; j < size; j += increment)
+	for (j = increment; j < size; j += increment)
 	{
 //		#pragma omp parallel for default(none) \
 				private(int_time_single, double_time_single, float_time_single, long_time_single, point_time_single) \

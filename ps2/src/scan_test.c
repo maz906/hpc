@@ -27,7 +27,9 @@ void scan_test(int size)
 
 void basic_scan_test(int size)
 {
+	size = min(20000, size);
 	int i;
+	#pragma omp parallel for
 	for (i = 1; i <= size; ++i)
 	{
 		printf("Testing prefix sum for size: %d\n", i);
