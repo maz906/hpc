@@ -1,3 +1,4 @@
+#include "assert.h"
 #include "stddef.h"
 #include "stdbool.h"
 #include "stdlib.h"
@@ -13,6 +14,16 @@ void* addition(void* a, void*b)
 	int* toReturn = (int*)calloc(1, sizeof(int));
 	memcpy(toReturn, &sum, sizeof(int));
 	return toReturn;
+}
+
+void print_int_array(int* base, size_t num) 
+{
+	size_t i;
+	for (i = 0; i < num; ++i) 
+	{
+		printf("%d ", base[i]);
+	}
+	printf("\n");
 }
 
 bool is_ordered(void* base, size_t num, size_t size, int (*compar)(const void*, const void*))
@@ -31,10 +42,8 @@ bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(co
 	size_t i;
 	for (i = 0; i < num; ++i) 
 	{
-		if (compar(((char*)arr1) + size*i, ((char*)arr2) + size*i) != 0) 
-		{
-			return false;
-		}
+		//printf("first_arr: %d, second_arr: %d\n", *(int*)((char*)arr1 + i*size), *(int*)((char*)arr2 + i*size));
+		assert((*compar)((char*)arr1 + size*i, (char*)arr2 + size*i) == 0);
 	}
 	return true;
 }
@@ -157,6 +166,6 @@ Point* random_point_array(size_t size)
 		p->y = random + (random/(double)(1 + (rand() % 100)));
 		arr[i] = *p; 
 	}
-	//free(p);
+	free(p);
 	return arr;
 }

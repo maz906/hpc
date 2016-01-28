@@ -44,6 +44,7 @@ void my_qsort(void* base, size_t num, size_t size,
 			qsort((char*)base + size*(*swappable + 1), num - *swappable - 1, size, compar);
 		}
 	}
+	free(swappable);
 }
 
 
@@ -55,11 +56,10 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, size_t* swap
 	#pragma omp parallel for
 	for (i = 0; i < num; ++i)
 		t[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
-	int* scan = (int*) genericScan(t, num, size, addition);
+	int* scan = (int*) genericScan(t, num, size, &addition);
 	//not sure this line is the right move
 	memcpy(swappable, scan + (num - 1)*size, size);
 	
-	//TODO: resolve access violation in this loop 
 	//test
 	#pragma omp parallel for
 	for (i = 0; i < num; ++i)
@@ -82,28 +82,36 @@ void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void 
 	if (num == 1) { memcpy(scan, base, byte_size); return scan; }
 	bool isOdd = (num % 2 == 1);
 	int size = isOdd ? (num / 2 + 1) : (num / 2);
-	void* b = calloc(byte_size, byte_size);
+	void* b = calloc(size, byte_size);
 	int i;
 	#pragma omp parallel for
 	for (i = 0; i < num / 2; ++i)
 	{
-		memcpy((char*)b + i*byte_size, (*oper) ((char*)base + 2 * i*byte_size, (char*)base + (2 * i + 1)*byte_size), byte_size);
+		int* add = (*oper) ((char*)base + 2 * i*byte_size, (char*)base + (2 * i + 1)*byte_size);
+		memcpy((char*)b + i*byte_size, add, byte_size);
+		free(add);
 	}
 
 	//edge case if n is odd
 	if (isOdd)
 	{
-		memcpy((char*)b + (num / 2)*byte_size, (char*)base + 2 * num*byte_size, byte_size);
+		memcpy((char*)b + (num / 2)*byte_size, (char*)base + (num - 1)*byte_size, byte_size);
 	}
-	void* c = genericScan(b, byte_size, byte_size, oper);
+	void* c = genericScan(b, size, byte_size, oper);
+	//free(b);
 	memcpy(scan, base, byte_size);	
 	#pragma omp parallel for
-	for (i = 0; i < num; ++i)
+	for (i = 1; i < num; ++i)
 		if (i % 2 == 0)
-			memcpy((char*)scan + i*byte_size, (*oper)((char*)c + (i/2)*byte_size, (char*)base + i*byte_size), byte_size);
+		{
+			int* add = (*oper)((char*)base + i*byte_size, (char*)c + (i/2 - 1)*byte_size);
+			memcpy((char*)scan + i*byte_size, add, byte_size);
+			free(add);
+		}
 		else
-			memcpy((char*)scan + i*byte_size, (char*)c + (i/2)*byte_size, byte_size);
-	free(b);
+		{
+			memcpy((char*)scan + i*byte_size, (char*)c + (i / 2)*byte_size, byte_size);
+		}
 	return scan;
 }
 

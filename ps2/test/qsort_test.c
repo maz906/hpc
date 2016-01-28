@@ -1,5 +1,6 @@
 #include "qsort.h"
 #include "point.h"
+#include "scan_test.h"
 #include "util.h"
 
 #include "assert.h"
@@ -10,16 +11,11 @@
 #include "stdbool.h"
 #include "string.h"
 
+//#define _CRTDBG_MAP_ALLOC
+//#include <stdlib.h>
+//#include <crtdbg.h>
 
-void print_int_array(int* base, size_t num) 
-{
-	size_t i;
-	for (i = 0; i < num; ++i) 
-	{
-		printf("%d ", base[i]);
-	}
-	printf("\n");
-}
+
 
 int main(int argv, char** argc) 
 {
@@ -29,7 +25,9 @@ int main(int argv, char** argc)
 		return 1;
 	}
 	//test_swap(atoi(argc[1]));
-	basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
+	scan_test(atoi(argc[2]));
+	//basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
+	//_CrtDumpMemoryLeaks();
 	return 0;
 }
 
@@ -108,7 +106,7 @@ Point test_array(void* arri_1, size_t num, size_t size, int (*compar) (const voi
 	difference_std = clock() - start;
 	assert(are_equal(arri_1, arri_2, num, size, compar));
 	Point p = { .x = difference * 1000/CLOCKS_PER_SEC, .y = difference_std * 1000/CLOCKS_PER_SEC};
-	//free(arri_2);
+	free(arri_1); free(arri_2);
 	return p;
 }
 
