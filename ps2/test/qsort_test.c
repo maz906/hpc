@@ -100,9 +100,11 @@ Point test_array(void* arri_1, size_t num, size_t size, int (*compar) (const voi
 	my_qsort(arri_1, num, size, compar);
 	difference = clock() - start;	
 	clock_t difference_std;
+	//print_int_array((int*)arri_1, num);
 	start = clock();
 	qsort(arri_2, num, size, compar);	
 	difference_std = clock() - start;
+	//print_int_array((int*)arri_2, num);
 	assert(are_equal(arri_1, arri_2, num, size, compar));
 	Point p = { .x = difference * 1000/CLOCKS_PER_SEC, .y = difference_std * 1000/CLOCKS_PER_SEC};
 	free(arri_1); free(arri_2);

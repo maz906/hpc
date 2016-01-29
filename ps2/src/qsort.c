@@ -1,4 +1,5 @@
 #include "qsort.h"
+#include "scan_test.h"
 #include "util.h"
 
 #include "assert.h"
@@ -30,7 +31,8 @@ void my_qsort(void* base, size_t num, size_t size,
 	
 	//pivot
 	void* pivot = (char*)base + size*(num - 1);
-	size_t* swappable = (size_t*) calloc(1, sizeof(size_t));
+	printf("pivot: %d\n", *(int*)pivot);
+	int* swappable = (int*) calloc(1, sizeof(int));
 	select_lower(base, num, size, pivot, swappable, compar);
 
 	//sort the other two arrays.
@@ -49,7 +51,7 @@ void my_qsort(void* base, size_t num, size_t size,
 }
 
 
-void select_lower(void* base, size_t num, size_t size, void* pivot, size_t* swappable, int (*compar)(const void*, const void*))
+void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
 {
 
 	int i;
@@ -58,18 +60,13 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, size_t* swap
 	for (i = 0; i < num; ++i)
 		t[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
 	int* scan = (int*) genericScan(t, num, sizeof(int), &addition);
-	memcpy(swappable, scan + (num - 1)*sizeof(int), size);
-	
-	//this is an illegal write access in here
+
+	memcpy(swappable, &scan[num - 1], sizeof(int));
 	#pragma omp parallel for
 	for (i = 0; i < num; ++i)
-		if (t[i])
+		if (t[i] == 1)
 		{
-
-			printf("Size: %d, idx: %d\n", num, i);
-			//assert((char*)base + (*(scan + i*sizeof(int)) - 1)*size != NULL);
-			//assert((char*)base + i*size != NULL);
-			swap((char*)base + (*(scan + i*sizeof(int)) - 1)*size, (char*)base + i*size, size);
+			swap((char*)base + (scan[i] - 1)*size, (char*)base + i*size, size);
 		}
 	swap(pivot, (char*) base + size*(*swappable), size);
 	free(t);
