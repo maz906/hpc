@@ -7,7 +7,7 @@
 #include "stdlib.h"
 #include "string.h"
 
-void swap(void* source, void* dest, size_t size) 
+inline void swap(void* source, void* dest, size_t size) 
 {
 	void* temp = calloc(1, size);
 	memcpy(temp, source, size);
@@ -16,7 +16,7 @@ void swap(void* source, void* dest, size_t size)
 	free(temp);
 }
 
-void* median(void* a, void* b, void* c, int (*compar)(const void*, const void*)) 
+inline void* median(void* a, void* b, void* c, int (*compar)(const void*, const void*)) 
 {
 	return (*compar)(a, b) < 0 ? 
 				  ( (*compar)(b, c) < 0 ? b : ((*compar)(a, c) < 0 ? c : a))
@@ -34,28 +34,32 @@ void my_qsort(void* base, size_t num, size_t size,
 {
 
 	//singleton array, so we are done
-	if (num > 1)
-	{	
-	
+	if (num <= 1) { return; }
+	//if (num > 1)
+	//{	
+		//insertion sort if small enough
 		//if (num <= 7)
 		//{
 		//	int i; int j;
 		//	for (i = 1; i < num; ++i)
 		//	{
-		//		int* swap = base + i*size;
-		//		while (j >= 0 && (*compar)(base + j*size, swap) > 0)
+		//		int* swap = (char*)base + i*size;
+		//		while (j >= 0 && (*compar)((char*)base + j*size, swap) > 0)
 		//		{
-		//			memcpy(base + (j + 1)*size, base + j*size, size);
+		//			memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
 		//			j--;
 		//		}
-		//		memcpy(base + (j + 1)*size, swap, size);
+		//		memcpy((char*)base + (j + 1)*size, swap, size);
 		//	}
 		//	return;
 		//}	
 		
 		//pivot
-		void* pivot = median(base, base + size*((num - 1)/2), base + size*(num - 1), compar);
-		swap(pivot, base + size*(num - 1), size);
+		//median of three pivot strategy
+		//swap(median(base, (char*)base + size*(num/2), (char*)base + size*(num - 1), compar), (char*)base + size*(num - 1), size);
+		//pick last item as pivot
+		void* pivot = (char*)base + size*(num - 1);
+		
 		int* swappable = (int*) calloc(1, sizeof(int));
 		select_lower(base, num, size, pivot, swappable, compar);
 
@@ -72,7 +76,8 @@ void my_qsort(void* base, size_t num, size_t size,
 			}
 		}
 		free(swappable);
-	}
+	//}
+
 }
 
 
@@ -81,13 +86,13 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 
 	int i;
 	int* t = (int*) calloc(num, sizeof(int));	
-	#pragma omp parallel for num_threads(48)
+	#pragma omp parallel for 
 	for (i = 0; i < num; ++i)
 		t[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
 	int* scan = (int*) genericScan(t, num, sizeof(int), &addition);
 
 	memcpy(swappable, &scan[num - 1], sizeof(int));
-	#pragma omp parallel for num_threads(48)
+	#pragma omp parallel for 
 	for (i = 0; i < num; ++i)
 		if (t[i] == 1)
 		{
@@ -132,12 +137,14 @@ void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void 
 	for (i = 1; i < num; ++i)
 		if (i % 2 == 0)
 		{
+			//i/2 - 1 or i/2?
 			int* add = (*oper)((char*)base + i*byte_size, (char*)c + (i/2 - 1)*byte_size);
 			memcpy((char*)scan + i*byte_size, add, byte_size);
 			free(add);
 		}
 		else
 		{
+
 			memcpy((char*)scan + i*byte_size, (char*)c + (i / 2)*byte_size, byte_size);
 		}
 	return scan;
