@@ -19,3 +19,4 @@ void* duplicate_array(void* arr, size_t num, size_t size);
 Point test_array(void* arr, size_t num, size_t size, int (*compar) (const void*, const void*));
 
 void* addition(void* a, void*b);
+void print_int_array(int* base, size_t num);

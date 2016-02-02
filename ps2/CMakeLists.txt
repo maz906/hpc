@@ -17,8 +17,8 @@ if(OPENMP_FOUND)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -O4")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -fopenmp -O4")
 
 # add all files ...
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${INC})

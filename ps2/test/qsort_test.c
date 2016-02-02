@@ -1,5 +1,6 @@
 #include "qsort.h"
 #include "point.h"
+#include "scan_test.h"
 #include "util.h"
 
 #include "assert.h"
@@ -10,16 +11,12 @@
 #include "stdbool.h"
 #include "string.h"
 
+//#define _CRTDBG_MAP_ALLOC
+//#include <stdlib.h>
+//#include <crtdbg.h>
 
-void print_int_array(int* base, size_t num) 
-{
-	size_t i;
-	for (i = 0; i < num; ++i) 
-	{
-		printf("%d ", base[i]);
-	}
-	printf("\n");
-}
+void experiment(int size);
+
 
 int main(int argv, char** argc) 
 {
@@ -28,9 +25,24 @@ int main(int argv, char** argc)
 		printf("Usage: ./test_qsort [iterations] [max_problem_size] [increment_step]\n");
 		return 1;
 	}
-	//test_swap(atoi(argc[1]));
+	//scan_test(atoi(argc[2]));
 	basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
 	return 0;
+}
+
+void experiment(int size)
+{
+
+	int* ptr1 = (int*)calloc(size, sizeof(int));
+	for (int i = 0; i < size; ++i)
+		ptr1[i] = i;
+	
+	int* ptr2 = (int*) calloc(size, sizeof(int));
+	memcpy(ptr2, ptr1, sizeof(int) * size);
+	for (int i = 0; i < size; ++i)
+		ptr2[i]++;
+
+	assert(are_equal(ptr1, ptr2, size, sizeof(int), *compar_int));
 }
 
 
@@ -41,7 +53,7 @@ void basic_test(size_t times, size_t size, size_t increment)
 	double int_time = 0, double_time = 0, float_time = 0, long_time = 0, point_time = 0;
 	Point int_time_single, double_time_single, long_time_single, point_time_single, float_time_single;
 	double int_time_std = 0, double_time_std = 0, float_time_std = 0, long_time_std = 0, point_time_std = 0;
-	for (j = 0; j < size; j += increment)
+	for (j = increment; j < size; j += increment)
 	{
 //		#pragma omp parallel for default(none) \
 				private(int_time_single, double_time_single, float_time_single, long_time_single, point_time_single) \
@@ -96,19 +108,29 @@ void basic_test(size_t times, size_t size, size_t increment)
 
 Point test_array(void* arri_1, size_t num, size_t size, int (*compar) (const void*, const void*)) 
 {
+	clock_t start;
 	void* arri_2 = duplicate_array(arri_1, num, size);
 	assert(are_equal(arri_1, arri_2, num, size, compar));
 	clock_t difference;	
-	clock_t start = clock();
+	start = clock();
 	my_qsort(arri_1, num, size, compar);
 	difference = clock() - start;	
+	//check that they aren't equal after sorting (highly unlikely)
+	//this assert always seems to fail
+	assert(!are_equal(arri_1, arri_2, num, size, compar));
+	free(arri_1);
+	//time the standard library
 	clock_t difference_std;
 	start = clock();
 	qsort(arri_2, num, size, compar);	
 	difference_std = clock() - start;
-	assert(are_equal(arri_1, arri_2, num, size, compar));
+	free(arri_2);
+	//time the custom quicksort
+	//check they're equal
+	//we're just testing for speed now
+	//assert(are_equal(arri_1, arri_2, num, size, compar));
 	Point p = { .x = difference * 1000/CLOCKS_PER_SEC, .y = difference_std * 1000/CLOCKS_PER_SEC};
-	//free(arri_2);
+	free(arri_2); 
 	return p;
 }
 
