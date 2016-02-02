@@ -95,16 +95,16 @@ Point test_array(void* arri_1, size_t num, size_t size, int (*compar) (const voi
 {
 	void* arri_2 = duplicate_array(arri_1, num, size);
 	assert(are_equal(arri_1, arri_2, num, size, compar));
-	clock_t difference;	
-	clock_t start = clock();
-	my_qsort(arri_1, num, size, compar);
-	difference = clock() - start;	
 	clock_t difference_std;
 	//print_int_array((int*)arri_1, num);
-	start = clock();
+	clock_t start = clock();
 	qsort(arri_2, num, size, compar);	
 	difference_std = clock() - start;
 	//print_int_array((int*)arri_2, num);
+	clock_t difference;	
+	start = clock();
+	my_qsort(arri_1, num, size, compar);
+	difference = clock() - start;	
 	assert(are_equal(arri_1, arri_2, num, size, compar));
 	Point p = { .x = difference * 1000/CLOCKS_PER_SEC, .y = difference_std * 1000/CLOCKS_PER_SEC};
 	free(arri_1); free(arri_2);

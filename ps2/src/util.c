@@ -42,7 +42,6 @@ bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(co
 	size_t i;
 	for (i = 0; i < num; ++i) 
 	{
-		//printf("first_arr: %d, second_arr: %d\n", *(int*)((char*)arr1 + i*size), *(int*)((char*)arr2 + i*size));
 		assert((*compar)((char*)arr1 + size*i, (char*)arr2 + size*i) == 0);
 	}
 	return true;

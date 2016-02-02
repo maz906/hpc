@@ -16,6 +16,13 @@ void swap(void* source, void* dest, size_t size)
 	free(temp);
 }
 
+void* median(void* a, void* b, void* c, int (*compar)(const void*, const void*)) 
+{
+	return (*compar)(a, b) < 0 ? 
+				  ( (*compar)(b, c) < 0 ? b : ((*compar)(a, c) < 0 ? c : a))
+				: ( (*compar)(b, c) > 0 ? b : ((*compar)(a, c) > 0 ? c : a));
+}
+
 /*
  * base - pointer to the first object of the array to be sorted
  * num - number of elements in the array pointed to by base
@@ -27,27 +34,45 @@ void my_qsort(void* base, size_t num, size_t size,
 {
 
 	//singleton array, so we are done
-	if (num <= 1) return;	
+	if (num > 1)
+	{	
 	
-	//pivot
-	void* pivot = (char*)base + size*(num - 1);
-	printf("pivot: %d\n", *(int*)pivot);
-	int* swappable = (int*) calloc(1, sizeof(int));
-	select_lower(base, num, size, pivot, swappable, compar);
+		//if (num <= 7)
+		//{
+		//	int i; int j;
+		//	for (i = 1; i < num; ++i)
+		//	{
+		//		int* swap = base + i*size;
+		//		while (j >= 0 && (*compar)(base + j*size, swap) > 0)
+		//		{
+		//			memcpy(base + (j + 1)*size, base + j*size, size);
+		//			j--;
+		//		}
+		//		memcpy(base + (j + 1)*size, swap, size);
+		//	}
+		//	return;
+		//}	
+		
+		//pivot
+		void* pivot = median(base, base + size*((num - 1)/2), base + size*(num - 1), compar);
+		swap(pivot, base + size*(num - 1), size);
+		int* swappable = (int*) calloc(1, sizeof(int));
+		select_lower(base, num, size, pivot, swappable, compar);
 
-	//sort the other two arrays.
-	#pragma omp parallel sections 
-	{
-		#pragma omp section 
+		//sort the other two arrays.
+		#pragma omp parallel sections 
 		{
-			qsort(base, *swappable, size, compar);
+			#pragma omp section 
+			{
+				qsort(base, *swappable, size, compar);
+			}
+			#pragma omp section 
+			{
+				qsort((char*)base + size*(*swappable + 1), num - *swappable - 1, size, compar);
+			}
 		}
-		#pragma omp section 
-		{
-			qsort((char*)base + size*(*swappable + 1), num - *swappable - 1, size, compar);
-		}
+		free(swappable);
 	}
-	free(swappable);
 }
 
 
@@ -56,13 +81,13 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 
 	int i;
 	int* t = (int*) calloc(num, sizeof(int));	
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(48)
 	for (i = 0; i < num; ++i)
 		t[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
 	int* scan = (int*) genericScan(t, num, sizeof(int), &addition);
 
 	memcpy(swappable, &scan[num - 1], sizeof(int));
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(48)
 	for (i = 0; i < num; ++i)
 		if (t[i] == 1)
 		{
