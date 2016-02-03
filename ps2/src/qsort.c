@@ -9,6 +9,7 @@
 
 inline void swap(void* source, void* dest, size_t size) 
 {
+	//more optimal way besides memcpy?
 	void* temp = calloc(1, size);
 	memcpy(temp, source, size);
 	memcpy(source, dest, size);
@@ -55,8 +56,8 @@ void my_qsort(void* base, size_t num, size_t size,
 		//}	
 		
 		//pivot
-		//median of three pivot strategy
-		//swap(median(base, (char*)base + size*(num/2), (char*)base + size*(num - 1), compar), (char*)base + size*(num - 1), size);
+		//median of three pivot strategy -- put median in last spot
+		swap(median(base, (char*)base + size*(num/2), (char*)base + size*(num - 1), compar), (char*)base + size*(num - 1), size);
 		//pick last item as pivot
 		void* pivot = (char*)base + size*(num - 1);
 		
