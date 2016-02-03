@@ -69,8 +69,8 @@ void my_qsort(void* base, size_t num, size_t size,
 		//ninther strategy
 		int div = num / 3;
 		void* pivot = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
-		swap(pivot, (char*)base + (num - 1)*size, size);
-		pivot = (char*)base + (num - 1)*size;
+		//swap(pivot, (char*)base + (num - 1)*size, size);
+		//pivot = (char*)base + (num - 1)*size;
 		//print_int_array(base, num);
 		int swappable;
 		select_lower(base, num, size, pivot, &swappable, compar);
@@ -88,6 +88,7 @@ void my_qsort(void* base, size_t num, size_t size,
 				qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
 			}
 		}
+		print_int_array(base, num);
 	}
 
 }
@@ -97,26 +98,56 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 {
 
 	//printf("pivot: %d\n", *(int*)pivot);
-	int i;
-	int* scan = (int*) malloc(num * sizeof(int));	
-	int* scan_copy = scan;
+	print_int_array(base, num);
+	void* new_base = malloc(num * size);
+	memcpy(new_base, base, num * size);
+	print_int_array(new_base, num);
+	int i; int larger_idx;
+	int* scan_less = (int*) malloc(num * sizeof(int));	
+	int* scan_more = (int*) malloc(num * sizeof(int));
+	int* scan_equa = (int*)malloc(num*sizeof(int));
 	#pragma omp parallel for 
 	for (i = 0; i < num; ++i)
-		scan[i] = ((*compar)((char*)base + size*i, pivot) == -1) ? 1 : 0;
-	scan = (int*) genericScan(scan, num, sizeof(int), &addition);
-
-	memcpy(swappable, &scan[num - 1], sizeof(int));
+	{
+		scan_less[i] = ((*compar)((char*)new_base + size*i, pivot) == -1) ? 1 : 0;
+		scan_more[i] = ((*compar)((char*)new_base + size*i, pivot) == 1) ? 1 : 0;
+		scan_equa[i] = ((*compar)((char*)new_base + size*i, pivot) == 0) ? 1 : 0;
+	}
+	print_int_array(scan_less, num);
+	print_int_array(scan_equa, num);
+	print_int_array(scan_more, num);
+	scan_less = (int*)genericScan(scan_less, num, sizeof(int), &addition);
+	scan_more = (int*)genericScan(scan_more, num, sizeof(int), &addition);
+	scan_equa = (int*)genericScan(scan_equa, num, sizeof(int), &addition);
+	print_int_array(scan_less, num);
+	print_int_array(scan_equa, num);
+	print_int_array(scan_more, num);
+	memcpy(swappable, &scan_less[num - 1], sizeof(int));
+	int equal = scan_equa[num - 1];
+	//memcpy((char*)new_base + (*swappable)*size, pivot, size);
 	#pragma omp parallel for num_threads(1)
 	for (i = 0; i < num; ++i)
 	{
-		int comparison = (*compar)((char*)base + size*i, pivot) == -1;
-		if (comparison)
+		int comparison = (*compar)((char*)new_base + size*i, pivot);
+		if (comparison == -1)
 		{
-			swap((char*)base + (scan[i] - 1)*size, (char*)base + i*size, size);
+			memcpy((char*)base + (scan_less[i] - 1)*size, (char*)new_base + i*size, size);
+		}
+		else if (comparison == 1)
+		{
+			memcpy((char*)base + (*swappable + equal + scan_more[i] - 1)*size, (char*)new_base + i*size, size);
+		}
+		else
+		{
+			memcpy((char*)base + (*swappable + scan_equa[i] - 1)*size, (char*)new_base + i*size, size);
 		}
 	}
-	swap((char*) base + size*(*swappable), pivot, size);
-	free(scan); free(scan_copy);
+	//memcpy(base, new_base, num*size);
+	free(scan_less); free(scan_more);
+	printf("pivot: %d\n", *(int*)pivot);
+	printf("swappable: %d\n", *swappable);
+	print_int_array(base, num);
+	free(new_base);
 }
 
 
