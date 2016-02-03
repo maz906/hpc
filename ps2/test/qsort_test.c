@@ -33,7 +33,7 @@ int main(int argv, char** argc)
 
 void scale_test(int procs, size_t times, size_t size, size_t increment)
 {
-	for (int i = procs; i <= procs; i *= 2)
+	for (int i = 1; i <= procs; i *= 2)
 	{
 		omp_set_num_threads(i);
 		printf("Setting number of processes: %d\n", i);
@@ -72,21 +72,21 @@ void basic_test(size_t times, size_t size, size_t increment)
 			int_time += int_time_single.x;
 			int_time_std += int_time_single.y;
 
-			//double_time_single = test_double_array(j, sizeof(double));
-			//double_time += double_time_single.x;
-			//double_time_std += double_time_single.y;
+			double_time_single = test_double_array(j, sizeof(double));
+			double_time += double_time_single.x;
+			double_time_std += double_time_single.y;
 
-			//float_time_single = test_float_array(j, sizeof(float));
-			//float_time += float_time_single.x;
-			//float_time_std += float_time_single.y;
+			float_time_single = test_float_array(j, sizeof(float));
+			float_time += float_time_single.x;
+			float_time_std += float_time_single.y;
 
-			//long_time_single = test_long_array(j, sizeof(long));
-			//long_time += long_time_single.x;
-			//long_time_std += long_time_single.y;
+			long_time_single = test_long_array(j, sizeof(long));
+			long_time += long_time_single.x;
+			long_time_std += long_time_single.y;
 
-			//point_time_single = test_Point_array(j, sizeof(Point));
-			//point_time += point_time_single.x;
-			//point_time_std += point_time_single.y;
+			point_time_single = test_Point_array(j, sizeof(Point));
+			point_time += point_time_single.x;
+			point_time_std += point_time_single.y;
 		}
 		printf("(int) array_size: %d, sort_time (ms): %g\n", j, int_time/times);
 		printf("(double) array_size: %d, sort_time (ms): %g\n", j, double_time/times);

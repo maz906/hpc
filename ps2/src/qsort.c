@@ -37,7 +37,7 @@ inline void* three_med(void* base, int num, int size, int (*compar)(const void*,
  * size - size in bytes of each element of the array
  * compar - pointer to function that compares two elements  
  */
-void my_qsort(void* base, size_t num, size_t size,
+void my_qsort(void* base, int num, int size,
 						int (*compar)(const void*, const void*))
 {
 
@@ -45,7 +45,7 @@ void my_qsort(void* base, size_t num, size_t size,
 	if (num > 1)
 	{	
 		//insertion sort if small enough
-		//if (num <= 7)
+		//if (num <= 10)
 		//{
 		//	int i; int j;
 		//	for (i = 1; i < num; ++i)
@@ -66,10 +66,10 @@ void my_qsort(void* base, size_t num, size_t size,
 		//pick last item as pivot
 		//void* mediann = (char*)base + (num - 1)*size;
 		//median of three
-		void* mediann = median(base, (char*)base + size*(num / 2), (char*)base + size*(num - 1), compar);
+		//void* mediann = median(base, (char*)base + size*(num / 2), (char*)base + size*(num - 1), compar);
 		//ninther strategy
-		//int div = num / 3;
-		//void* mediann = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
+		int div = num / 3;
+		void* mediann = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
 		memcpy(pivot, mediann, size);
 		//swap(pivot, (char*)base + (num - 1)*size, size);
 		//pivot = (char*)base + (num - 1)*size;
@@ -96,18 +96,18 @@ void my_qsort(void* base, size_t num, size_t size,
 }
 
 
-void select_lower(void* base, int num, int size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
+void partition(void* base, int num, int size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
 {
 
 	//printf("pivot: %d\n", *(int*)pivot);
 	void* new_base = malloc(num * size);
 	memcpy(new_base, base, num * size);
-	int i; int larger_idx;
+	int i;
 	int* scan_less = (int*) malloc(num * sizeof(int));	
 	int* scan_more = (int*) malloc(num * sizeof(int));
 	int* scan_equa = (int*)malloc(num*sizeof(int));
-	int* dummy;
-	#pragma omp parallel for firstprivate(pivot, size, num)
+	int* sl_old = scan_less; int* sm_old = scan_more; int* se_old = scan_equa;
+	#pragma omp parallel for firstprivate(pivot)
 	for (i = 0; i < num; ++i)
 	{
 		int comparison = (*compar)((char*)new_base + size*i, pivot);
@@ -115,13 +115,26 @@ void select_lower(void* base, int num, int size, void* pivot, int* swappable, in
 		scan_more[i] = (comparison == 1) ? 1 : 0;
 		scan_equa[i] = (comparison == 0) ? 1 : 0;
 	}
-	scan_less = (int*)genericScan(scan_less, num, sizeof(int), &addition);
-	scan_more = (int*)genericScan(scan_more, num, sizeof(int), &addition);
-	scan_equa = (int*)genericScan(scan_equa, num, sizeof(int), &addition);
+	#pragma omp parallel sections
+	{
+		#pragma omp section 
+		{
+			scan_less = (int*)genericScan(scan_less, num, sizeof(int), &addition);
+		}
+		#pragma omp section
+		{
+			scan_more = (int*)genericScan(scan_more, num, sizeof(int), &addition);
+		}
+		#pragma omp section
+		{
+			scan_equa = (int*)genericScan(scan_equa, num, sizeof(int), &addition);
+		}
+	}
+	free(sl_old); free(sm_old); free(se_old);
 	memcpy(swappable, &scan_less[num - 1], sizeof(int));
 	int equal = scan_equa[num - 1];
 	//memcpy((char*)new_base + (*swappable)*size, pivot, size);
-	#pragma omp parallel for firstprivate(pivot, size, num)
+	#pragma omp parallel for firstprivate(pivot)
 	for (i = 0; i < num; ++i)
 	{
 		int comparison = (*compar)((char*)new_base + size*i, pivot);
@@ -150,7 +163,7 @@ void select_lower(void* base, int num, int size, void* pivot, int* swappable, in
  * l - size of pointers in the array
  * oper - pointer to function that operates on two elements 
  */
-void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void *x1, void* x2)) 
+void* genericScan(void* base, int num, int byte_size, void*  (*oper)(void *x1, void* x2)) 
 {	
 	void* scan = malloc(num * byte_size); 
 	//void* scan = base;
@@ -159,7 +172,7 @@ void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void 
 	int size = isOdd ? (num / 2 + 1) : (num / 2);
 	void* b = malloc(size * byte_size);
 	int i;
-	#pragma omp parallel for
+	#pragma omp parallel for 
 	for (i = 0; i < num / 2; ++i)
 	{
 		int* add = (*oper) ((char*)base + 2 * i*byte_size, (char*)base + (2 * i + 1)*byte_size);
@@ -175,7 +188,7 @@ void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void 
 	void* c = genericScan(b, size, byte_size, oper);
 	free(b);
 	memcpy(scan, base, byte_size);	
-	#pragma omp parallel for
+	#pragma omp parallel for 
 	for (i = 1; i < num; ++i)
 		if (i % 2 == 0)
 		{

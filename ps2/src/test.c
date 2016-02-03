@@ -13,16 +13,15 @@ Point run(void* arri_1, void* arri_2, size_t num, size_t size, int (*compar) (co
 {
 	clock_t start;
 	//assert(are_equal(arri_1, arri_2, num, size, compar));
-	clock_t difference;	
-	start = clock();
-	my_qsort(arri_1, num, size, compar);
-	difference = clock() - start;	
-	//assert(!is_ordered(arri_2, num, size, compar));
-	//time the standard library
-	clock_t difference_std;
+	clock_t difference;	clock_t difference_std;
 	start = clock();
 	qsort(arri_2, num, size, compar);	
 	difference_std = clock() - start;
+	//assert(!is_ordered(arri_2, num, size, compar));
+	//time the standard library
+	start = clock();
+	my_qsort(arri_1, num, size, compar);
+	difference = clock() - start;	
 	//we're just testing for speed now
 	//print_int_array(arri_1, num);
 	//print_int_array(arri_2, num);
