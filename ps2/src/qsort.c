@@ -62,13 +62,15 @@ void my_qsort(void* base, size_t num, size_t size,
 		//}	
 		
 		//pivot
+		void* pivot = malloc(size);
 		//pick last item as pivot
-		//void* pivot = (char*)base + (num - 1)*size;
+		//void* mediann = (char*)base + (num - 1)*size;
 		//median of three
-		//void* pivot = median(base, (char*)base + size*(num / 2), (char*)base + size*(num - 1), compar);
+		void* mediann = median(base, (char*)base + size*(num / 2), (char*)base + size*(num - 1), compar);
 		//ninther strategy
-		int div = num / 3;
-		void* pivot = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
+		//int div = num / 3;
+		//void* mediann = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
+		memcpy(pivot, mediann, size);
 		//swap(pivot, (char*)base + (num - 1)*size, size);
 		//pivot = (char*)base + (num - 1)*size;
 		//print_int_array(base, num);
@@ -88,44 +90,38 @@ void my_qsort(void* base, size_t num, size_t size,
 				qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
 			}
 		}
-		print_int_array(base, num);
+		free(pivot);
 	}
 
 }
 
 
-void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
+void select_lower(void* base, int num, int size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
 {
 
 	//printf("pivot: %d\n", *(int*)pivot);
-	print_int_array(base, num);
 	void* new_base = malloc(num * size);
 	memcpy(new_base, base, num * size);
-	print_int_array(new_base, num);
 	int i; int larger_idx;
 	int* scan_less = (int*) malloc(num * sizeof(int));	
 	int* scan_more = (int*) malloc(num * sizeof(int));
 	int* scan_equa = (int*)malloc(num*sizeof(int));
-	#pragma omp parallel for 
+	int* dummy;
+	#pragma omp parallel for firstprivate(pivot, size, num)
 	for (i = 0; i < num; ++i)
 	{
-		scan_less[i] = ((*compar)((char*)new_base + size*i, pivot) == -1) ? 1 : 0;
-		scan_more[i] = ((*compar)((char*)new_base + size*i, pivot) == 1) ? 1 : 0;
-		scan_equa[i] = ((*compar)((char*)new_base + size*i, pivot) == 0) ? 1 : 0;
+		int comparison = (*compar)((char*)new_base + size*i, pivot);
+		scan_less[i] = (comparison == -1) ? 1 : 0;
+		scan_more[i] = (comparison == 1) ? 1 : 0;
+		scan_equa[i] = (comparison == 0) ? 1 : 0;
 	}
-	print_int_array(scan_less, num);
-	print_int_array(scan_equa, num);
-	print_int_array(scan_more, num);
 	scan_less = (int*)genericScan(scan_less, num, sizeof(int), &addition);
 	scan_more = (int*)genericScan(scan_more, num, sizeof(int), &addition);
 	scan_equa = (int*)genericScan(scan_equa, num, sizeof(int), &addition);
-	print_int_array(scan_less, num);
-	print_int_array(scan_equa, num);
-	print_int_array(scan_more, num);
 	memcpy(swappable, &scan_less[num - 1], sizeof(int));
 	int equal = scan_equa[num - 1];
 	//memcpy((char*)new_base + (*swappable)*size, pivot, size);
-	#pragma omp parallel for num_threads(1)
+	#pragma omp parallel for firstprivate(pivot, size, num)
 	for (i = 0; i < num; ++i)
 	{
 		int comparison = (*compar)((char*)new_base + size*i, pivot);
@@ -139,14 +135,11 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 		}
 		else
 		{
-			memcpy((char*)base + (*swappable + scan_equa[i] - 1)*size, (char*)new_base + i*size, size);
+			memcpy((char*)base + (*swappable + scan_equa[i] - 1)*size, pivot, size);
 		}
 	}
 	//memcpy(base, new_base, num*size);
 	free(scan_less); free(scan_more);
-	printf("pivot: %d\n", *(int*)pivot);
-	printf("swappable: %d\n", *swappable);
-	print_int_array(base, num);
 	free(new_base);
 }
 
@@ -160,6 +153,7 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void *x1, void* x2)) 
 {	
 	void* scan = malloc(num * byte_size); 
+	//void* scan = base;
 	if (num == 1) { memcpy(scan, base, byte_size); return scan; }
 	bool isOdd = (num % 2 == 1);
 	int size = isOdd ? (num / 2 + 1) : (num / 2);
