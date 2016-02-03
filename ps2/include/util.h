@@ -16,7 +16,6 @@ void basic_test(size_t times, size_t size, size_t increment);
 bool is_ordered(void* base, size_t num, size_t size, int (*compar)(const void*, const void*));
 bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar) (const void*, const void*));
 void* duplicate_array(void* arr, size_t num, size_t size);
-Point test_array(void* arr, size_t num, size_t size, int (*compar) (const void*, const void*));
 
 void* addition(void* a, void*b);
 void print_int_array(int* base, size_t num);
