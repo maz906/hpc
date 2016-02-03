@@ -45,21 +45,21 @@ void my_qsort(void* base, int num, int size,
 	if (num > 1)
 	{	
 		//insertion sort if small enough
-		//if (num <= 10)
-		//{
-		//	int i; int j;
-		//	for (i = 1; i < num; ++i)
-		//	{
-		//		int* swap = (char*)base + i*size;
-		//		while (j >= 0 && (*compar)((char*)base + j*size, swap) > 0)
-		//		{
-		//			memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
-		//			j--;
-		//		}
-		//		memcpy((char*)base + (j + 1)*size, swap, size);
-		//	}
-		//	return;
-		//}	
+		if (num <= 10)
+		{
+			int i; int j;
+			for (i = 1; i < num; ++i)
+			{
+				int* swap = (char*)base + i*size;
+				while (j >= 0 && (*compar)((char*)base + j*size, swap) > 0)
+				{
+					memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
+					j--;
+				}
+				memcpy((char*)base + (j + 1)*size, swap, size);
+			}
+			return;
+		}	
 		
 		//pivot
 		void* pivot = malloc(size);
@@ -75,7 +75,7 @@ void my_qsort(void* base, int num, int size,
 		//pivot = (char*)base + (num - 1)*size;
 		//print_int_array(base, num);
 		int swappable;
-		select_lower(base, num, size, pivot, &swappable, compar);
+		partition(base, num, size, pivot, &swappable, compar);
 		//printf("swappable: %d\n", swappable);
 		//print_int_array(base, num);
 		//sort the other two arrays.
@@ -93,6 +93,21 @@ void my_qsort(void* base, int num, int size,
 		free(pivot);
 	}
 
+}
+
+void partition_2(void*base, int num, int size, void* pivot, int* swappable, int(*compar)(const void*, const void*))
+{
+	int max_threads = omp_get_max_threads();
+
+	int* scans = malloc(max_threads * size);
+#pragma omp parallel
+	{
+		int tid = omp_get_thread_num();
+
+		for (int i = (tid / max_threads)*num; i < (tid / max_threads + 1)*num; ++i)
+			return;
+
+	}
 }
 
 

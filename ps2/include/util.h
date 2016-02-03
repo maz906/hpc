@@ -19,3 +19,4 @@ void* duplicate_array(void* arr, size_t num, size_t size);
 
 void* addition(void* a, void*b);
 void print_int_array(int* base, size_t num);
+Vector* random_vector_array(size_t size);

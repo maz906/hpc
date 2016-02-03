@@ -169,3 +169,22 @@ Point* random_point_array(size_t size)
 	free(p);
 	return arr;
 }
+
+Vector* random_vector_array(size_t size)
+{
+	Vector* arr = (Vector*) malloc(size * sizeof(Vector));
+	Vector* p = (Vector*) malloc(sizeof(Vector));
+	time_t t;
+	srand((unsigned) time(&t));
+	size_t i;
+	for (i = 0; i < size; ++i) 
+	{
+		int random = rand();
+		p->x = random + (random/(double)(1 + (rand() % 100)));
+		p->y = random + (random/(double)(1 + (rand() % 100)));
+		p->z = random + (random / (double)(1 + (rand() % 100)));
+		arr[i] = *p; 
+	}
+	free(p);
+	return arr;
+}
