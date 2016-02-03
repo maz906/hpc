@@ -11,7 +11,7 @@
 void* addition(void* a, void*b) 
 {
 	int sum = *(int*)a + *(int*)b;
-	int* toReturn = (int*)calloc(1, sizeof(int));
+	int* toReturn = (int*)malloc(sizeof(int));
 	memcpy(toReturn, &sum, sizeof(int));
 	return toReturn;
 }
@@ -42,14 +42,15 @@ bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(co
 	size_t i;
 	for (i = 0; i < num; ++i) 
 	{
-		assert((*compar)((char*)arr1 + size*i, (char*)arr2 + size*i) == 0);
+		if ((*compar)((char*)arr1 + size*i, (char*)arr2 + size*i) != 0)
+			return false;
 	}
 	return true;
 }
 
 void* duplicate_array(void* arr, size_t num, size_t size) 
 {
-	void* arr2 = calloc(num, size); 
+	void* arr2 = malloc(num*size); 
 	memcpy(arr2, arr, num*size);
 	return arr2;
 }
@@ -108,7 +109,7 @@ int* random_int_array(size_t num)
 {
 	time_t t;
 	srand((unsigned) time(&t));
-	int* arr = (int*) calloc(num, sizeof(int));
+	int* arr = (int*) malloc(num * sizeof(int));
 	size_t i;
 	for (i = 0; i < num; ++i)
 	{
@@ -121,7 +122,7 @@ long* random_long_array(size_t num)
 {
 	time_t t;
 	srand((unsigned) time(&t));
-	long* arr = (long*) calloc(num, sizeof(long));
+	long* arr = (long*) malloc(num * sizeof(long));
 	size_t i;
 	for (i = 0; i < num; ++i)
 	{
@@ -136,7 +137,7 @@ double* random_double_array(size_t size)
 {
 	time_t t;
 	srand((unsigned) time(&t));
-	double* arr = (double*) calloc(size, sizeof(double));
+	double* arr = (double*) malloc(size * sizeof(double));
 	size_t i;
 	for (i = 0; i < size; ++i)
 	{
@@ -153,8 +154,8 @@ float* random_float_array(size_t size)
 
 Point* random_point_array(size_t size)
 {
-	Point* arr = (Point*) calloc(size, sizeof(Point));
-	Point* p = (Point*) calloc(1, sizeof(Point));
+	Point* arr = (Point*) malloc(size * sizeof(Point));
+	Point* p = (Point*) malloc(sizeof(Point));
 	time_t t;
 	srand((unsigned) time(&t));
 	size_t i;

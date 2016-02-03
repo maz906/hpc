@@ -18,7 +18,7 @@ if(OPENMP_FOUND)
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -O4")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -fopenmp -O4")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -fopenmp -Ofast")
 
 # add all files ...
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${INC})
