@@ -63,14 +63,14 @@ void my_qsort(void* base, size_t num, size_t size,
 		
 		//pivot
 		//pick last item as pivot
-		void* pivot = (char*)base + (num - 1)*size;
+		//void* pivot = (char*)base + (num - 1)*size;
 		//median of three
 		//void* pivot = median(base, (char*)base + size*(num / 2), (char*)base + size*(num - 1), compar);
 		//ninther strategy
-		//int div = num / 3;
-		//void* pivot = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
+		int div = num / 3;
+		void* pivot = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
 		swap(pivot, (char*)base + (num - 1)*size, size);
-		//assert(*(int*)pivot, *(int*)((char*)base + (num - 1)*size));
+		pivot = (char*)base + (num - 1)*size;
 		//print_int_array(base, num);
 		int swappable;
 		select_lower(base, num, size, pivot, &swappable, compar);
@@ -98,24 +98,25 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 
 	//printf("pivot: %d\n", *(int*)pivot);
 	int i;
-	int* t = (int*) malloc(num * sizeof(int));	
+	int* scan = (int*) malloc(num * sizeof(int));	
+	int* scan_copy = scan;
 	#pragma omp parallel for 
 	for (i = 0; i < num; ++i)
-		t[i] = (*compar)((char*)base + size*i, pivot) == -1 ? 1 : 0;
-	int* scan = (int*) genericScan(t, num, sizeof(int), &addition);
+		scan[i] = ((*compar)((char*)base + size*i, pivot) == -1) ? 1 : 0;
+	scan = (int*) genericScan(scan, num, sizeof(int), &addition);
 
 	memcpy(swappable, &scan[num - 1], sizeof(int));
 	#pragma omp parallel for num_threads(1)
 	for (i = 0; i < num; ++i)
 	{
-		//if ((*compar)((char*) base + size*i, pivot) < 0)
-		if (t[i] == 1)
+		int comparison = (*compar)((char*)base + size*i, pivot) == -1;
+		if (comparison)
 		{
 			swap((char*)base + (scan[i] - 1)*size, (char*)base + i*size, size);
 		}
 	}
 	swap((char*) base + size*(*swappable), pivot, size);
-	free(scan); free(t);
+	free(scan); free(scan_copy);
 }
 
 
