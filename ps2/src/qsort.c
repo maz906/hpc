@@ -6,6 +6,8 @@
 #include "stdlib.h"
 #include "string.h"
 
+#include "omp.h"
+
 
 /*
  * base - pointer to the first object of the array to be sorted
@@ -22,7 +24,6 @@ void my_qsort(void* base, size_t num, size_t size,
 	{
 		//if (num <= 10)
 		//{
-		//	print_int_array(base, num);
 		//	int i; int j;
 		//	for (i = 1; i < num; ++i)
 		//	{
@@ -35,7 +36,6 @@ void my_qsort(void* base, size_t num, size_t size,
 		//		}
 		//		memcpy((char*)base + (j + 1)*size, key, size);
 		//	}
-		//	print_int_array(base, num);
 		//	return;
 		//}
 
@@ -55,6 +55,7 @@ void my_qsort(void* base, size_t num, size_t size,
 		//want to get the index for the partitioning
 		int swappable;
 		select_lower(base, num, size, pivot, &swappable, compar);
+		swap((char*)base + size*(num - 1), (char*) base + size*(swappable), size);
 
 		//sort the other two arrays.
 #pragma omp parallel sections 
@@ -71,6 +72,66 @@ void my_qsort(void* base, size_t num, size_t size,
 	}
 }
 
+void select_lower_inplace(void* base, size_t num, size_t size, void* pivot, int* swappable, int(*compar)(const void*, const void*))
+{
+	int procs = omp_get_num_threads;
+	int* thread_scan_sums = malloc(procs * sizeof(int));
+#pragma omp parallel
+{
+	int tid = omp_get_thread_num();
+	//smaller chunks of memory better than large ones
+	int* indicator = malloc( (num/procs) * sizeof(int));
+#pragma omp for
+	for (int i = tid * (num / procs); i < (tid + 1)*(num / procs); ++i)
+		indicator[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
+
+	//idk who else to give the last bit to
+#pragma omp master 
+	for (int i = procs * (num / procs); i < num; ++i)
+		indicator[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
+
+	int* scanned = (int*)slowScan(indicator, 0, num/procs , size, &addition);
+	memcpy((char*)thread_scan_sums + tid*sizeof(int), scanned[num / procs - 1], sizeof(int));
+
+//wait for all threads to finish copying their data to thread_scan_sums
+#pragma omp barrier
+#pragma omp single
+	int* thread_scan_sums = slowScan(thread_scan_sums, 0, procs, sizeof(int), &addition);
+#pragma omp for
+	int adjustment = thread_scan_sums[tid]; //this adjustment may be off. needs to be zero in front.
+	for (int i = tid * (num/procs); i < (tid + 1) * (num/procs); ++i)
+	{
+		if (indicator[i])
+		{
+			swap((char*)base + (scanned[i] - 1 + adjustment)*size, (char*)base + i*size, size);
+		}
+	}
+
+#pragma omp master
+	int adjustment = thread_scan_sums[procs - 1]; //this adjustment may be off. needs to be zero in front.
+	for (int i = procs * (num/procs); i < num; ++i)
+	{
+		if (indicator[i])
+		{
+			swap((char*)base + (scanned[i] - 1 + adjustment)*size, (char*)base + i*size, size);
+		}
+	}
+}
+}
+
+void* slowScan(void* base, int left, int right, size_t size, void* (*oper)(void *x1, void *x2))
+{
+	int i; int num = right - left;
+	void* scanned = malloc(num * size);
+	memcpy(scanned, base, size);
+	for (i = left + 1; i < left + num; ++i)
+	{
+		int* add = (*oper)((char*)scanned + (i - 1)*size, (char*)base + i*size);
+		memcpy((char*)scanned + i*size, add, size);
+		free(add);
+	}
+	return scanned;
+}
 
 void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
 {
@@ -86,13 +147,12 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 	#pragma omp parallel for num_threads(1)
 	for (i = 0; i < num; ++i)
 	{
-		if (t[i] == 1)
+		if ((*compar)((char*) base + size*i, pivot) == -1)
 		{
 			swap((char*)base + (scan[i] - 1)*size, (char*)base + i*size, size);
 		}
 
 	}
-	swap((char*)base + size*(num - 1), (char*) base + size*(*swappable), size);
 	free(t); free(scan);
 }
 

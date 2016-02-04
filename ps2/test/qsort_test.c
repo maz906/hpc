@@ -30,7 +30,7 @@ int main(int argv, char** argc)
 		printf("Usage: ./test_qsort [iterations] [max_problem_size] [increment_step]\n");
 		return 1;
 	}
-	scale_test(32, atoi(argc[2]));
+	//scale_test(32, atoi(argc[2]));
 	basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
 	//_CrtDumpMemoryLeaks();
 	return 0;

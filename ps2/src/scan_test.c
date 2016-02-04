@@ -9,7 +9,7 @@
 void* slowScan(void* base, size_t num, size_t size, void* (*oper)(void *x1, void *x2))
 {
 	int i;
-	void* scanned = calloc(num, size);
+	void* scanned = malloc(num * size);
 	memcpy(scanned, base, size);
 	for (i = 1; i < num; ++i)
 	{
