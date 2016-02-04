@@ -1,9 +1,9 @@
 #include "assert.h"
 #include "stdlib.h"
+#include "stdbool.h"
 #include "string.h"
 
 #include "scan_test.h"
-#include "qsort.h"
 #include "util.h"
 
 void* slowScan(void* base, size_t num, size_t size, void* (*oper)(void *x1, void *x2))

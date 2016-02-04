@@ -1,5 +1,4 @@
 #include "qsort.h"
-#include "scan_test.h"
 #include "util.h"
 
 #include "assert.h"
@@ -7,14 +6,6 @@
 #include "stdlib.h"
 #include "string.h"
 
-void swap(void* source, void* dest, size_t size) 
-{
-	void* temp = calloc(1, size);
-	memcpy(temp, source, size);
-	memcpy(source, dest, size);
-	memcpy(dest, temp, size);
-	free(temp);
-}
 
 /*
  * base - pointer to the first object of the array to be sorted
@@ -27,27 +18,57 @@ void my_qsort(void* base, size_t num, size_t size,
 {
 
 	//singleton array, so we are done
-	if (num <= 1) return;	
-	
-	//pivot
-	void* pivot = (char*)base + size*(num - 1);
-	printf("pivot: %d\n", *(int*)pivot);
-	int* swappable = (int*) calloc(1, sizeof(int));
-	select_lower(base, num, size, pivot, swappable, compar);
-
-	//sort the other two arrays.
-	#pragma omp parallel sections 
+	if (num > 1)
 	{
-		#pragma omp section 
+		//if (num <= 10)
+		//{
+		//	print_int_array(base, num);
+		//	int i; int j;
+		//	for (i = 1; i < num; ++i)
+		//	{
+		//		int* key = (char*)base + i*size;
+		//		j = i - 1;
+		//		while (j >= 0 && (*compar)((char*)base + j*size, key) > 0)
+		//		{
+		//			memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
+		//			j--;
+		//		}
+		//		memcpy((char*)base + (j + 1)*size, key, size);
+		//	}
+		//	print_int_array(base, num);
+		//	return;
+		//}
+
+		//pivot
+		int div = num / 3;
+		void* med;
+		//if large enough, use ninther
+		if (num > 9)
+			med = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
+		else //use median of three
+			med = median(base, (char*)base + (num / 2)*size, (char*)base + (num - 1)*size, compar);
+		void* pivot = malloc(size);
+		//swap so the pivot is last, so we'll know where it is
+		swap((char*)base + (num - 1)*size, med, size);
+		//make permanent copy so pivot doesn't point to different things 
+		memcpy(pivot, (char*)base + (num - 1)*size, size);
+		//want to get the index for the partitioning
+		int swappable;
+		select_lower(base, num, size, pivot, &swappable, compar);
+
+		//sort the other two arrays.
+#pragma omp parallel sections 
 		{
-			qsort(base, *swappable, size, compar);
+#pragma omp section 
+		{
+			my_qsort(base, swappable, size, compar);
 		}
-		#pragma omp section 
+#pragma omp section 
 		{
-			qsort((char*)base + size*(*swappable + 1), num - *swappable - 1, size, compar);
+			my_qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
+		}
 		}
 	}
-	free(swappable);
 }
 
 
@@ -55,21 +76,24 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 {
 
 	int i;
-	int* t = (int*) calloc(num, sizeof(int));	
+	int* t = (int*) malloc(num * sizeof(int));	
 	#pragma omp parallel for
 	for (i = 0; i < num; ++i)
 		t[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
 	int* scan = (int*) genericScan(t, num, sizeof(int), &addition);
 
 	memcpy(swappable, &scan[num - 1], sizeof(int));
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(1)
 	for (i = 0; i < num; ++i)
+	{
 		if (t[i] == 1)
 		{
 			swap((char*)base + (scan[i] - 1)*size, (char*)base + i*size, size);
 		}
-	swap(pivot, (char*) base + size*(*swappable), size);
-	free(t);
+
+	}
+	swap((char*)base + size*(num - 1), (char*) base + size*(*swappable), size);
+	free(t); free(scan);
 }
 
 
@@ -81,11 +105,11 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
  */
 void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void *x1, void* x2)) 
 {	
-	void* scan = calloc(num, byte_size); 
+	void* scan = malloc(num * byte_size); 
 	if (num == 1) { memcpy(scan, base, byte_size); return scan; }
 	bool isOdd = (num % 2 == 1);
 	int size = isOdd ? (num / 2 + 1) : (num / 2);
-	void* b = calloc(size, byte_size);
+	void* b = malloc(size*byte_size);
 	int i;
 	#pragma omp parallel for
 	for (i = 0; i < num / 2; ++i)
@@ -101,7 +125,7 @@ void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void 
 		memcpy((char*)b + (num / 2)*byte_size, (char*)base + (num - 1)*byte_size, byte_size);
 	}
 	void* c = genericScan(b, size, byte_size, oper);
-	//free(b);
+	free(b);
 	memcpy(scan, base, byte_size);	
 	#pragma omp parallel for
 	for (i = 1; i < num; ++i)

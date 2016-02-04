@@ -4,6 +4,7 @@
 #include "stdlib.h"
 #include "string.h"
 
+
 #include "point.h"
 #include "time.h"
 
@@ -43,7 +44,8 @@ bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(co
 	for (i = 0; i < num; ++i) 
 	{
 		//printf("first_arr: %d, second_arr: %d\n", *(int*)((char*)arr1 + i*size), *(int*)((char*)arr2 + i*size));
-		assert((*compar)((char*)arr1 + size*i, (char*)arr2 + size*i) == 0);
+		if ((*compar)((char*)arr1 + size*i, (char*)arr2 + size*i) != 0)
+			return false;
 	}
 	return true;
 }

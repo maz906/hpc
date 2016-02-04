@@ -1,5 +1,8 @@
 #pragma once
 
+#include "stdlib.h"
+#include "string.h"
+
 #include "point.h"
 
 int* random_int_array(size_t);
@@ -20,3 +23,26 @@ Point test_array(void* arr, size_t num, size_t size, int (*compar) (const void*,
 
 void* addition(void* a, void*b);
 void print_int_array(int* base, size_t num);
+
+
+
+extern inline void swap(void* source, void* dest, size_t size) 
+{
+	void* temp = malloc(size);
+	memcpy(temp, source, size);
+	memcpy(source, dest, size);
+	memcpy(dest, temp, size);
+	free(temp);
+}
+
+inline void* median(void* a, void* b, void* c, int(*compar)(const void*, const void*))
+{
+	return (*compar)(a, b) < 0 ?
+		((*compar)(b, c) < 0 ? b : ((*compar)(a, c) < 0 ? c : a))
+		: ((*compar)(b, c) > 0 ? b : ((*compar)(a, c) > 0 ? c : a));
+}
+
+inline void* three_med(void* base, int num, int size, int(*compar)(const void*, const void*))
+{
+	return median(base, (char*)base + (num / 2)*size, (char*)base + (num - 1)*size, compar);
+}
