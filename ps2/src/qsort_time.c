@@ -13,7 +13,7 @@ extern int ITERS;
 void qsort_time(int size)
 {
 	//scale_qsort_time(size, 16);
-	omp_set_num_threads(4);
+	omp_set_num_threads(3);
 	basic_qsort_time(size, INCREMENT, ITERS);
 }
 

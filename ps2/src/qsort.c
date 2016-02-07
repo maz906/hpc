@@ -23,33 +23,30 @@ void my_qsort(void* base, int num, int size,
 	//singleton array, so we are done
 	if (num > 1)
 	{
-		//if (num <= 10)
-		//{
-		//	int i; int j;
-		//	int* key = malloc(sizeof(int));
-		//	for (i = 1; i < num; ++i)
-		//	{
-		//		memcpy(key, (char*)base + i*size, size);
-		//		j = i - 1;
-		//		while (j >= 0 && (*compar)(key, (char*)base + j*size) < 0)
-		//		{
-		//			memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
-		//			j--;
-		//		}
-		//		memcpy((char*)base + (j + 1)*size, key, size);
-		//	}
-		//	free(key);
-		//	return;
-		//}
+		if (num <= 20)
+		{
+			int i; int j;
+			int* key = malloc(size);
+			for (i = 1; i < num; ++i)
+			{
+				memcpy(key, (char*)base + i*size, size);
+				j = i - 1;
+				while (j >= 0 && (*compar)(key, (char*)base + j*size) < 0)
+				{
+					memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
+					j--;
+				}
+				memcpy((char*)base + (j + 1)*size, key, size);
+			}
+			free(key);
+			return;
+		}
 
-		//pivot
 		int div = num / 3;
 		void* med;
 		//if large enough, use ninther
-		if (num > 9)
-			med = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
-		else //use median of three
-			med = median(base, (char*)base + (num / 2)*size, (char*)base + (num - 1)*size, compar);
+		med = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
+		//med = median(base, (char*)base + (num / 2)*size, (char*)base + (num - 1)*size, compar);
 		void* pivot = malloc(size);
 		//swap so the pivot is last, so we'll know where it is
 		swap((char*)base + (num - 1)*size, med, size);
@@ -57,93 +54,120 @@ void my_qsort(void* base, int num, int size,
 		memcpy(pivot, (char*)base + (num - 1)*size, size);
 		//want to get the index for the partitioning
 		int swappable;
-		partition(base, num, size, pivot, &swappable, compar);
+		if (num <= 4000)
+			partition_seq(base, num, size, pivot, &swappable, compar);
+		else /* partition_inplace seems to work best with the above combination */
+			partition_inplace(base, num, size, pivot, &swappable, compar);
 		swap((char*)base + size*(num - 1), (char*) base + size*(swappable), size);
 
-		//while (num > 1)
-		//{
-		//		
-		//	int div = num / 3;
-		//	void* med;
-		//	//if large enough, use ninther
-		//	if (num > 9)
-		//		med = median(three_med(base, div, size, compar), three_med((char*)base + div*size, div, size, compar), three_med((char*)base + 2 * div*size, div, size, compar), compar);
-		//	else //use median of three
-		//		med = median(base, (char*)base + (num / 2)*size, (char*)base + (num - 1)*size, compar);
-		//	void* pivot = malloc(size);
-		//	//swap so the pivot is last, so we'll know where it is
-		//	swap((char*)base + (num - 1)*size, med, size);
-		//	//make permanent copy so pivot doesn't point to different things 
-		//	memcpy(pivot, (char*)base + (num - 1)*size, size);
-		//	//want to get the index for the partitioning
-		//	int swappable;
-		//	partition(base, num, size, pivot, &swappable, compar);
-		//	swap((char*)base + size*(num - 1), (char*) base + size*(swappable), size);
-		//}
-
-		//sort the other two arrays.
-		//my_qsort(base, swappable, size, compar);
-		//my_qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
-//#pragma omp parallel sections 
-//		{
-//#pragma omp section 
-//		{
-//			my_qsort(base, swappable, size, compar);
-//		}
-//#pragma omp section 
-//		{
-//			my_qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
-//		}
-//		}
+		//sort the other two arrays. this is to force tail recursion...
+		if (swappable < num - 2 * swappable - 2)
+		{
+			my_qsort(base, swappable, size, compar);
+			my_qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
+		}
+		else
+		{
+			my_qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
+			my_qsort(base, swappable, size, compar);
+		}
 	}
 }
 
-//void select_lower_inplace(void* base, size_t num, size_t size, void* pivot, int* swappable, int(*compar)(const void*, const void*))
-//{
-//	int procs = omp_get_num_threads;
-//	int* thread_scan_sums = malloc(procs * sizeof(int));
-//#pragma omp parallel
-//{
-//	int tid = omp_get_thread_num();
-//	//smaller chunks of memory better than large ones
-//	int* indicator = malloc( (num/procs) * sizeof(int));
-//#pragma omp for
-//	for (int i = tid * (num / procs); i < (tid + 1)*(num / procs); ++i)
-//		indicator[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
+/* keep getting write access violations. not sure why... */
+void partition_inplace2(void* base, size_t num, size_t size, void* pivot, int* swappable, int(*compar)(const void*, const void*))
+{
+	int* thread_scan_sums;
+	int procs;
+#pragma omp parallel
+	{
+		procs = omp_get_num_threads();
+#pragma omp single 
+		{
+			thread_scan_sums = (int*) calloc((procs + 1), sizeof(int));
+		}
+		int tid = omp_get_thread_num();
+		//smaller chunks of memory better than large ones
 
-//	//idk who else to give the last bit to
-//#pragma omp master 
-//	for (int i = procs * (num / procs); i < num; ++i)
-//		indicator[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
+		for (int i = tid * (num / procs); i < (tid + 1)*(num / procs); ++i)
+			if ((*compar)((char*)base + size*i, pivot) == -1)
+			{
+				thread_scan_sums[tid]++;
+			}
 
-//	slowScan(indicator, 0, num/procs , size, &addition);
-//	memcpy((char*)thread_scan_sums + tid*sizeof(int), scanned[num / procs - 1], sizeof(int));
+		//idk who else to give the last bit to
+#pragma omp single 
+		for (int i = procs * (num / procs); i < num; ++i)
+			if ((*compar)((char*)base + size*i, pivot) == -1)
+			{
+				thread_scan_sums[procs]++;
+			}
+#pragma omp single
+			{
+				slowScan(thread_scan_sums, procs + 1, sizeof(int), &addition);
+				*swappable = thread_scan_sums[procs];
+			}
+#pragma omp barrier
+		int less_than_in_reg = thread_scan_sums[tid];
+		int lt_sofar = thread_scan_sums[tid - 1];
+		for (int i = tid * (num / procs); i < (tid + 1)*(num / procs); ++i)
+			if ((*compar)((char*)base + size*i, pivot) == -1)
+			{
+				swap((char*)base + (lt_sofar++)*size, (char*)base + i*size, size);
+			}
+#pragma omp single 
+			{
+				int less_than_in_reg = thread_scan_sums[procs];
+				int lt_sofar = thread_scan_sums[procs - 1];
+				for (int i = procs * (num / procs); i < num; ++i)
+					if ((*compar)((char*)base + size*i, pivot) == -1)
+					{
+						swap((char*)base + (lt_sofar++)*size, (char*)base + i*size, size);
+					}
+			}
+	}
+}
 
-////wait for all threads to finish copying their data to thread_scan_sums
-//#pragma omp barrier
-//#pragma omp single
-//	slowScan(thread_scan_sums, 0, procs, sizeof(int), &addition);
-//#pragma omp for
-//	int adjustment = thread_scan_sums[tid]; //this adjustment may be off. needs to be zero in front.
-//	for (int i = tid * (num/procs); i < (tid + 1) * (num/procs); ++i)
-//	{
-//		if (indicator[i])
-//		{
-//			swap((char*)base + (scanned[i] - 1 + adjustment)*size, (char*)base + i*size, size);
-//		}
-//	}
 
-//#pragma omp master
-//	int adjustment = thread_scan_sums[procs - 1]; //this adjustment may be off. needs to be zero in front.
-//	for (int i = procs * (num/procs); i < num; ++i)
-//	{
-//		if (indicator[i])
-//		{
-//			swap((char*)base + (scanned[i] - 1 + adjustment)*size, (char*)base + i*size, size);
-//		}
-//	}
-//}
-//}
+void partition_inplace(void* base, size_t num, size_t size, void* pivot, int* swappable, int(*compar)(const void*, const void*))
+{
+	int* thread_scan_sums;
+	int procs;
+#pragma omp parallel
+	{
+		procs = omp_get_num_threads();
+#pragma omp single 
+		{
+			thread_scan_sums = (int*) calloc((procs + 1), sizeof(int));
+		}
+		int tid = omp_get_thread_num();
+		//smaller chunks of memory better than large ones
+
+		for (int i = tid * (num / procs); i < (tid + 1)*(num / procs); ++i)
+			if ((*compar)((char*)base + size*i, pivot) == -1)
+			{
+				thread_scan_sums[tid]++;
+			}
+
+		//idk who else to give the last bit to
+#pragma omp master 
+		for (int i = procs * (num / procs); i < num; ++i)
+			if ((*compar)((char*)base + size*i, pivot) == -1)
+			{
+				thread_scan_sums[procs]++;
+			}
+	}
+//wait for all threads to finish copying their data to thread_scan_sums
+	slowScan(thread_scan_sums, procs + 1, sizeof(int), &addition);
+	int swapp = 0;
+	*swappable = thread_scan_sums[procs];
+	for (int i = 0; i < num; ++i)
+		if ((*compar)((char*)base + size*i, pivot) == -1 && swapp < swappable)
+		{
+			swap((char*)base + (swapp++)*size, (char*)base + i*size, size);
+		}
+	free(thread_scan_sums);
+}
 
 
 void partition(void* base, int num, int size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
@@ -166,5 +190,15 @@ void partition(void* base, int num, int size, void* pivot, int* swappable, int (
 	free(scan);
 }
 
+void partition_seq(void* base, int num, int size, void* pivot, int* swappable, int(*compar)(const void*, const void*))
+{
+	int swapp = 0;
+	for (int i = 0; i < num; ++i)
+		if ((*compar)((char*)base + size*i, pivot) == -1)
+		{
+			swap((char*)base + (swapp++)*size, (char*)base + i*size, size);
+		}
+	*swappable = swapp;
+}
 
 
