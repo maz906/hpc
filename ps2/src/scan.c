@@ -46,16 +46,19 @@ void genericScan(void* base, int num, int byte_size, void*  (*oper)(void *x1, vo
 		{
 			int inc = (int)exp2(d);
 			int two_inc = 2 * inc;
-#pragma omp parallel for firstprivate(inc, two_inc) schedule(guided)
+			bool out_of_bounds;
+#pragma omp parallel for firstprivate(inc, two_inc) schedule(guided) private(out_of_bounds)
 			for (k = 0; k < num; k += two_inc)
 			{
 				int idx1 = k + inc - 1;
 				int idx2 = k + two_inc - 1;
-				if (idx1 >= num || idx2 >= num)
-					break;
-				void* add = (*oper)((char*)base + (k + inc - 1)*byte_size, (char*)base + (k + two_inc - 1)*byte_size);
-				memcpy((char*)base + (k + two_inc - 1)*byte_size, add, byte_size);
-				free(add);
+				out_of_bounds = (idx1 >= num) || (idx2 >= num);
+				if (!out_of_bounds)
+				{
+					void* add = (*oper)((char*)base + (k + inc - 1)*byte_size, (char*)base + (k + two_inc - 1)*byte_size);
+					memcpy((char*)base + (k + two_inc - 1)*byte_size, add, byte_size);
+					free(add);
+				}
 			}
 		}
 
@@ -64,16 +67,19 @@ void genericScan(void* base, int num, int byte_size, void*  (*oper)(void *x1, vo
 		{
 			int inc = (int)exp2(d);
 			int two_inc = 2 * inc;
+			bool out_of_bounds;
 #pragma omp parallel for firstprivate(inc, two_inc) schedule(guided)
 			for (k = 0; k < num; k += two_inc)
 			{
 				int idx1 = k + inc + two_inc - 1;
 				int idx2 = k + two_inc - 1;
-				if (idx1 >= num || idx2 >= num)
-					break;
-				void* add = (*oper)((char*)base + (idx2)*byte_size, (char*)base + (idx1)*byte_size);
-				memcpy((char*)base + (idx1)*byte_size, add, byte_size);
-				free(add);
+				out_of_bounds = (idx1 >= num) || (idx2 >= num);
+				if (!out_of_bounds)
+				{
+					void* add = (*oper)((char*)base + (idx2)*byte_size, (char*)base + (idx1)*byte_size);
+					memcpy((char*)base + (idx1)*byte_size, add, byte_size);
+					free(add);
+				}
 		}
 		}
 	}

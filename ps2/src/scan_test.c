@@ -23,7 +23,7 @@ void scan_test(int size)
   */
 void rigor_scan_test(int size)
 {
-	size = min(10000, size);
+	size = (10000 < size) ? 10000 : size;
 	int i;
 	for (i = 1; i <= size; i += 10)
 	{

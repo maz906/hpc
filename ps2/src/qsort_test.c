@@ -1,8 +1,12 @@
 #include "point.h"
 #include "qsort.h"
 #include "qsort_test.h"
+#include "util.h"
 
+#include "assert.h"
+#include "math.h"
 #include "stddef.h"
+#include "stdlib.h"
 
 #include "omp.h"
 
@@ -17,7 +21,7 @@ void qsort_test(int size)
 
 void rigor_qsort_test(int size)
 {
-	size = min(10000, size);
+	size = 10000 < size ? 10000 : size;
 	int i;
 	for (i = 1; i <= size; ++i)
 	{
@@ -33,11 +37,11 @@ void basic_qsort_test(int size, int increment)
 	for (i = increment; i <= size; i += increment)
 	{
 		printf("Testing qsort for size: %d\n", i);	
-		rand_int = rand_int_array(i);
-		rand_doub = rand_double_array(i);
-		rand_float = rand_float_array(i);
-		rand_long = rand_long_array(i);
-		rand_point = rand_point_array(i);
+		rand_int = random_int_array(i);
+		rand_doub = random_double_array(i);
+		rand_float = random_float_array(i);
+		rand_long = random_long_array(i);
+		rand_point = random_point_array(i);
 
 		test_qsort_array(rand_int, i, size, &compar_int);
 		test_qsort_array(rand_doub, i, size, &compar_double);
@@ -50,7 +54,7 @@ void basic_qsort_test(int size, int increment)
 void test_qsort_array(void* arri1, size_t num, size_t size, int(*compar)(const void*, const void*))
 {
 	void* arri_2 = duplicate_array(arri1, num, size);
-	my_qsort(arri_1, num, size, compar);
+	my_qsort(arri1, num, size, compar);
 	qsort(arri_2, num, size, compar);
 	assert(are_equal(arri1, arri_2, num, size, compar));
 	free(arri1); free(arri_2);
