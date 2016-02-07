@@ -34,7 +34,7 @@ Vector* add_vec(Vector* a, Vector* b);
 void print_int_array(int* base, size_t num);
 
 //mostly for quicksort but...
-extern inline void swap(void* source, void* dest, size_t size) 
+inline void swap(void* source, void* dest, size_t size) 
 {
 	void* temp = malloc(size);
 	memcpy(temp, source, size);

@@ -17,8 +17,8 @@ extern int INCREMENT;
 
 void qsort_test(int size)
 {
+	rigor_qsort_test(size);
 	omp_set_num_threads(6);
-	//rigor_qsort_test(size);
 	basic_qsort_test(size, INCREMENT);
 }
 
@@ -55,18 +55,18 @@ void basic_qsort_test(int size, int increment)
 	int* rand_int; double* rand_double; float* rand_float; long* rand_long; Point* rand_point; 
 	for (j = increment; j <= size; j += increment)
 	{
-			rand_int = random_int_array(j);
-			rand_double = random_double_array(j);
-			rand_float = random_float_array(j);
-			rand_long = random_long_array(j);
-			rand_point = random_point_array(j);
-			test_qsort_array(rand_int, j, sizeof(int), &compar_int);
-			test_qsort_array(rand_double, j, sizeof(double), &compar_double);
-			test_qsort_array(rand_float, j, sizeof(float), &compar_float);
-			test_qsort_array(rand_long, j, sizeof(long), &compar_long);
-			test_qsort_array(rand_point, j, sizeof(Point), &compar_point);
-			free(rand_int); free(rand_double); free(rand_long); free(rand_point); free(rand_float);
-		}
+		printf("Testing size: %d\n", j);
+		rand_int = random_int_array(j);
+		rand_double = random_double_array(j);
+		rand_float = random_float_array(j);
+		rand_long = random_long_array(j);
+		rand_point = random_point_array(j);
+		test_qsort_array(rand_int, j, sizeof(int), &compar_int);
+		test_qsort_array(rand_double, j, sizeof(double), &compar_double);
+		test_qsort_array(rand_float, j, sizeof(float), &compar_float);
+		test_qsort_array(rand_long, j, sizeof(long), &compar_long);
+		test_qsort_array(rand_point, j, sizeof(Point), &compar_point);
+	}
 }
 
 void test_qsort_array(void* arri_1, size_t num, size_t size, int (*compar) (const void*, const void*)) 

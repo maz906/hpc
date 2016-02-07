@@ -19,7 +19,7 @@ int main(int argv, char** argc)
 	ITERS = atoi(argc[1]);
 	//scan_test(atoi(argc[2]));
 	//scan_time(atoi(argc[2]));
-	qsort_test(atoi(argc[2]));
+	//qsort_test(atoi(argc[2]));
 	qsort_time(atoi(argc[2]));
 	return 0;
 }

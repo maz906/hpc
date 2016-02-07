@@ -46,7 +46,7 @@ void genericScan(void* base, int num, int byte_size, void*  (*oper)(void *x1, vo
 		{
 			int inc = (int)exp2(d);
 			int two_inc = 2 * inc;
-#pragma omp parallel for 
+#pragma omp parallel for firstprivate(inc, two_inc) schedule(guided)
 			for (k = 0; k < num; k += two_inc)
 			{
 				int idx1 = k + inc - 1;
@@ -64,7 +64,7 @@ void genericScan(void* base, int num, int byte_size, void*  (*oper)(void *x1, vo
 		{
 			int inc = (int)exp2(d);
 			int two_inc = 2 * inc;
-#pragma omp parallel for 
+#pragma omp parallel for firstprivate(inc, two_inc) schedule(guided)
 			for (k = 0; k < num; k += two_inc)
 			{
 				int idx1 = k + inc + two_inc - 1;
