@@ -22,7 +22,6 @@ int compar_point(const Point*, const Point*);
 bool is_ordered(void* base, size_t num, size_t size, int (*compar)(const void*, const void*));
 bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar) (const void*, const void*));
 void* duplicate_array(void* arr, size_t num, size_t size);
-Point test_array(void* arr, size_t num, size_t size, int (*compar) (const void*, const void*));
 
 void* addition(void* a, void*b);
 void* add_doub(double* a, double*b);

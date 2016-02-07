@@ -37,6 +37,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\qsort_time.c">
+    <ClCompile Include="..\src\test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
