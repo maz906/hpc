@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export OMP_NUM_THREADS=24
+mkdir cmake
 cd cmake
 cmake ..
 make all

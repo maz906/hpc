@@ -27,6 +27,16 @@
     <ClCompile Include="..\src\util.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\scan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scan_time.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\qsort_time.c">
     <ClCompile Include="..\src\test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -44,7 +54,16 @@
     <ClInclude Include="..\include\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\test.h">
+    <ClInclude Include="..\include\scan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\qsort_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\scan_time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\qsort_time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

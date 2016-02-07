@@ -4,6 +4,7 @@
 #include "stdlib.h"
 #include "string.h"
 
+
 #include "point.h"
 #include "time.h"
 
@@ -14,6 +15,46 @@ void* addition(void* a, void*b)
 	int* toReturn = (int*)malloc(sizeof(int));
 	memcpy(toReturn, &sum, sizeof(int));
 	return toReturn;
+}
+
+void* add_doub(double* a, double*b)
+{
+	double sum = *(double*)a + *(double*)b;
+	double* toReturn = (double*)malloc(sizeof(double));
+	memcpy(toReturn, &sum, sizeof(double));
+	return toReturn;
+}
+void* add_float(float* a, float* b)
+{
+	float sum = *(float*)a + *(float*)b;
+	float* toReturn = (float*)malloc(sizeof(float));
+	memcpy(toReturn, &sum, sizeof(float));
+	return toReturn;
+}
+
+void add_long(long* a, long*b)
+{
+	long sum = *(long*)a + *(long*)b;
+	long* toReturn = (long*)malloc(sizeof(long));
+	memcpy(toReturn, &sum, sizeof(long));
+	return toReturn;
+}
+
+Point* add_point(Point* a, Point* b)
+{
+	Point* sum = malloc(sizeof(Point));
+	sum->x = a->x + b->x;
+	sum->y = a->y + b->y;
+	return sum;
+}
+
+Vector* add_vec(Vector* a, Vector* b)
+{
+	Vector* vec = (Vector*) malloc(sizeof(Vector));
+	vec->x = a->x + b->x;
+	vec->y = a->y + b->y;
+	vec->z = a->z + b->z;
+	return vec;
 }
 
 void print_int_array(int* base, size_t num) 
@@ -50,7 +91,7 @@ bool are_equal(void* arr1, void* arr2, size_t num, size_t size, int (*compar)(co
 
 void* duplicate_array(void* arr, size_t num, size_t size) 
 {
-	void* arr2 = malloc(num*size); 
+	void* arr2 = malloc(num* size); 
 	memcpy(arr2, arr, num*size);
 	return arr2;
 }
@@ -154,7 +195,7 @@ float* random_float_array(size_t size)
 
 Point* random_point_array(size_t size)
 {
-	Point* arr = (Point*) malloc(size * sizeof(Point));
+	Point* arr = (Point*) malloc(size* sizeof(Point));
 	Point* p = (Point*) malloc(sizeof(Point));
 	time_t t;
 	srand((unsigned) time(&t));
@@ -169,20 +210,19 @@ Point* random_point_array(size_t size)
 	free(p);
 	return arr;
 }
-
-Vector* random_vector_array(size_t size)
+Vector* random_vec_array(size_t size)
 {
-	Vector* arr = (Vector*) malloc(size * sizeof(Vector));
+	Vector* arr = (Vector*) malloc(size* sizeof(Vector));
 	Vector* p = (Vector*) malloc(sizeof(Vector));
 	time_t t;
 	srand((unsigned) time(&t));
 	size_t i;
 	for (i = 0; i < size; ++i) 
 	{
-		int random = rand();
+		int random = rand() % 100000;
 		p->x = random + (random/(double)(1 + (rand() % 100)));
 		p->y = random + (random/(double)(1 + (rand() % 100)));
-		p->z = random + (random / (double)(1 + (rand() % 100)));
+		p->z = random + (random/(double)(1 + (rand() % 100)));
 		arr[i] = *p; 
 	}
 	free(p);
