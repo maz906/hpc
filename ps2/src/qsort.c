@@ -1,4 +1,5 @@
 #include "qsort.h"
+#include "scan.h"
 #include "util.h"
 
 #include "assert.h"
@@ -15,7 +16,7 @@
  * size - size in bytes of each element of the array
  * compar - pointer to function that compares two elements  
  */
-void my_qsort(void* base, size_t num, size_t size,
+void my_qsort(void* base, int num, int size,
 						int (*compar)(const void*, const void*))
 {
 
@@ -58,90 +59,79 @@ void my_qsort(void* base, size_t num, size_t size,
 		swap((char*)base + size*(num - 1), (char*) base + size*(swappable), size);
 
 		//sort the other two arrays.
-#pragma omp parallel sections 
-		{
-#pragma omp section 
-		{
-			my_qsort(base, swappable, size, compar);
-		}
-#pragma omp section 
-		{
-			my_qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
-		}
-		}
+		my_qsort(base, swappable, size, compar);
+		my_qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
+//#pragma omp parallel sections 
+//		{
+//#pragma omp section 
+//		{
+//			my_qsort(base, swappable, size, compar);
+//		}
+//#pragma omp section 
+//		{
+//			my_qsort((char*)base + size*(swappable + 1), num - swappable - 1, size, compar);
+//		}
+//		}
 	}
 }
 
-void select_lower_inplace(void* base, size_t num, size_t size, void* pivot, int* swappable, int(*compar)(const void*, const void*))
-{
-	int procs = omp_get_num_threads;
-	int* thread_scan_sums = malloc(procs * sizeof(int));
-#pragma omp parallel
-{
-	int tid = omp_get_thread_num();
-	//smaller chunks of memory better than large ones
-	int* indicator = malloc( (num/procs) * sizeof(int));
-#pragma omp for
-	for (int i = tid * (num / procs); i < (tid + 1)*(num / procs); ++i)
-		indicator[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
+//void select_lower_inplace(void* base, size_t num, size_t size, void* pivot, int* swappable, int(*compar)(const void*, const void*))
+//{
+//	int procs = omp_get_num_threads;
+//	int* thread_scan_sums = malloc(procs * sizeof(int));
+//#pragma omp parallel
+//{
+//	int tid = omp_get_thread_num();
+//	//smaller chunks of memory better than large ones
+//	int* indicator = malloc( (num/procs) * sizeof(int));
+//#pragma omp for
+//	for (int i = tid * (num / procs); i < (tid + 1)*(num / procs); ++i)
+//		indicator[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
 
-	//idk who else to give the last bit to
-#pragma omp master 
-	for (int i = procs * (num / procs); i < num; ++i)
-		indicator[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
+//	//idk who else to give the last bit to
+//#pragma omp master 
+//	for (int i = procs * (num / procs); i < num; ++i)
+//		indicator[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
 
-	int* scanned = (int*)slowScan(indicator, 0, num/procs , size, &addition);
-	memcpy((char*)thread_scan_sums + tid*sizeof(int), scanned[num / procs - 1], sizeof(int));
+//	int* scanned = (int*)slowScan(indicator, 0, num/procs , size, &addition);
+//	memcpy((char*)thread_scan_sums + tid*sizeof(int), scanned[num / procs - 1], sizeof(int));
 
-//wait for all threads to finish copying their data to thread_scan_sums
-#pragma omp barrier
-#pragma omp single
-	int* thread_scan_sums = slowScan(thread_scan_sums, 0, procs, sizeof(int), &addition);
-#pragma omp for
-	int adjustment = thread_scan_sums[tid]; //this adjustment may be off. needs to be zero in front.
-	for (int i = tid * (num/procs); i < (tid + 1) * (num/procs); ++i)
-	{
-		if (indicator[i])
-		{
-			swap((char*)base + (scanned[i] - 1 + adjustment)*size, (char*)base + i*size, size);
-		}
-	}
+////wait for all threads to finish copying their data to thread_scan_sums
+//#pragma omp barrier
+//#pragma omp single
+//	int* thread_scan_sums = slowScan(thread_scan_sums, 0, procs, sizeof(int), &addition);
+//#pragma omp for
+//	int adjustment = thread_scan_sums[tid]; //this adjustment may be off. needs to be zero in front.
+//	for (int i = tid * (num/procs); i < (tid + 1) * (num/procs); ++i)
+//	{
+//		if (indicator[i])
+//		{
+//			swap((char*)base + (scanned[i] - 1 + adjustment)*size, (char*)base + i*size, size);
+//		}
+//	}
 
-#pragma omp master
-	int adjustment = thread_scan_sums[procs - 1]; //this adjustment may be off. needs to be zero in front.
-	for (int i = procs * (num/procs); i < num; ++i)
-	{
-		if (indicator[i])
-		{
-			swap((char*)base + (scanned[i] - 1 + adjustment)*size, (char*)base + i*size, size);
-		}
-	}
-}
-}
+//#pragma omp master
+//	int adjustment = thread_scan_sums[procs - 1]; //this adjustment may be off. needs to be zero in front.
+//	for (int i = procs * (num/procs); i < num; ++i)
+//	{
+//		if (indicator[i])
+//		{
+//			swap((char*)base + (scanned[i] - 1 + adjustment)*size, (char*)base + i*size, size);
+//		}
+//	}
+//}
+//}
 
-void* slowScan(void* base, int left, int right, size_t size, void* (*oper)(void *x1, void *x2))
-{
-	int i; int num = right - left;
-	void* scanned = malloc(num * size);
-	memcpy(scanned, base, size);
-	for (i = left + 1; i < left + num; ++i)
-	{
-		int* add = (*oper)((char*)scanned + (i - 1)*size, (char*)base + i*size);
-		memcpy((char*)scanned + i*size, add, size);
-		free(add);
-	}
-	return scanned;
-}
 
-void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
+void select_lower(void* base, int num, int size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
 {
 
 	int i;
-	int* t = (int*) malloc(num * sizeof(int));	
+	int* scan = (int*) malloc(num * sizeof(int));	
 	#pragma omp parallel for
 	for (i = 0; i < num; ++i)
-		t[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
-	int* scan = (int*) genericScan(t, num, sizeof(int), &addition);
+		scan[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
+	genericScan(scan, num, sizeof(int), &addition);
 
 	memcpy(swappable, &scan[num - 1], sizeof(int));
 	#pragma omp parallel for num_threads(1)
@@ -153,53 +143,8 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, int* swappab
 		}
 
 	}
-	free(t); free(scan);
+	free(scan);
 }
 
-
-/*
- * base - pointer to first object of array
- * n - number of elements in array pointed to by base
- * l - size of pointers in the array
- * oper - pointer to function that operates on two elements 
- */
-void* genericScan(void* base, size_t num, size_t byte_size, void*  (*oper)(void *x1, void* x2)) 
-{	
-	void* scan = malloc(num * byte_size); 
-	if (num == 1) { memcpy(scan, base, byte_size); return scan; }
-	bool isOdd = (num % 2 == 1);
-	int size = isOdd ? (num / 2 + 1) : (num / 2);
-	void* b = malloc(size*byte_size);
-	int i;
-	#pragma omp parallel for
-	for (i = 0; i < num / 2; ++i)
-	{
-		int* add = (*oper) ((char*)base + 2 * i*byte_size, (char*)base + (2 * i + 1)*byte_size);
-		memcpy((char*)b + i*byte_size, add, byte_size);
-		free(add);
-	}
-
-	//edge case if n is odd
-	if (isOdd)
-	{
-		memcpy((char*)b + (num / 2)*byte_size, (char*)base + (num - 1)*byte_size, byte_size);
-	}
-	void* c = genericScan(b, size, byte_size, oper);
-	free(b);
-	memcpy(scan, base, byte_size);	
-	#pragma omp parallel for
-	for (i = 1; i < num; ++i)
-		if (i % 2 == 0)
-		{
-			int* add = (*oper)((char*)base + i*byte_size, (char*)c + (i/2 - 1)*byte_size);
-			memcpy((char*)scan + i*byte_size, add, byte_size);
-			free(add);
-		}
-		else
-		{
-			memcpy((char*)scan + i*byte_size, (char*)c + (i / 2)*byte_size, byte_size);
-		}
-	return scan;
-}
 
 

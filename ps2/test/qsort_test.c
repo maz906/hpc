@@ -1,6 +1,6 @@
 #include "qsort.h"
 #include "point.h"
-#include "scan_test.h"
+#include "qsort_test.h"
 #include "util.h"
 
 #include "assert.h"
@@ -13,33 +13,46 @@
 
 #include "omp.h"
 
-void scale_test(int procs, int size)
+extern int INCREMENT;
+
+void qsort_test(int size)
+{
+	scale_qsort_test(size, 24);
+	rigor_qsort_test(size);
+	basic_qsort_test(size, INCREMENT);
+}
+
+void scale_qsort_test(int procs, int size)
 {
 	for (int i = 1; i < procs; i *= 2)
 	{
 		printf("Number of threads: %d\n", i);
 		omp_set_num_threads(i);
-		basic_test(10, size, size);
+		basic_qsort_test(size, INCREMENT);
 	}
 }
 
-int main(int argv, char** argc) 
+void rigor_qsort_test(int size)
 {
-	if (argv < 4)
+	size = min(10000, size);
+	int i;
+	for (i = 1; i <= size; ++i)
 	{
-		printf("Usage: ./test_qsort [iterations] [max_problem_size] [increment_step]\n");
-		return 1;
+		printf("Testing prefix sum for size: %d\n", i);
+		int* ones = random_int_array(i);
+		int* ones_dup = duplicate_array(ones, i, sizeof(int));
+		my_qsort(ones, i, sizeof(int), &addition);
+		my_qsort(ones_dup, i, sizeof(int), &addition);
+		assert(are_equal(ones, ones_dup, i, sizeof(int), &compar_int));
+		free(ones); free(ones_dup);
 	}
-	//scale_test(32, atoi(argc[2]));
-	basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
-	//_CrtDumpMemoryLeaks();
-	return 0;
 }
 
-void basic_test(size_t times, size_t size, size_t increment) 
+void basic_qsort_test(int size, int increment) 
 {
 	
 	int i, j;
+	int times = 300;
 	int* rand_int; double* rand_double; float* rand_float; long* rand_long; Point* rand_point;
 	double int_time = 0, double_time = 0, float_time = 0, long_time = 0, point_time = 0;
 	Point int_time_single, double_time_single, long_time_single, point_time_single, float_time_single;

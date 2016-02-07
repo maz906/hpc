@@ -146,15 +146,21 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\main.c" />
     <ClCompile Include="..\src\qsort.c" />
+    <ClCompile Include="..\src\scan.c" />
     <ClCompile Include="..\src\scan_test.c" />
+    <ClCompile Include="..\src\scan_time.c" />
     <ClCompile Include="..\src\util.c" />
     <ClCompile Include="..\test\qsort_test.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\point.h" />
     <ClInclude Include="..\include\qsort.h" />
+    <ClInclude Include="..\include\qsort_test.h" />
+    <ClInclude Include="..\include\scan.h" />
     <ClInclude Include="..\include\scan_test.h" />
+    <ClInclude Include="..\include\scan_time.h" />
     <ClInclude Include="..\include\util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
