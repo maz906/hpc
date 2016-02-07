@@ -10,17 +10,6 @@
 #include "omp.h"
 
 
-inline void* median(void* a, void* b, void* c, int (*compar)(const void*, const void*)) 
-{
-	return (*compar)(a, b) < 0 ? 
-				  ( (*compar)(b, c) < 0 ? b : ((*compar)(a, c) < 0 ? c : a))
-				: ( (*compar)(b, c) > 0 ? b : ((*compar)(a, c) > 0 ? c : a));
-}
-
-inline void* three_med(void* base, int num, int size, int (*compar)(const void*, const void*))
-{
-	return median(base, (char*)base + (num / 2)*size, (char*)base + (num - 1)*size, compar);
-}
 
 /*
  * base - pointer to the first object of the array to be sorted
@@ -48,7 +37,6 @@ void my_qsort(void* base, int num, int size,
 					memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
 					j--;
 				}
-<<<<<<< HEAD
 				memcpy((char*)base + (j + 1)*size, key, size);
 			}
 			free(key);

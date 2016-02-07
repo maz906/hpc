@@ -2,6 +2,7 @@
 #include "scan_time.h"
 #include "util.h"
 
+#include "stdio.h"
 #include "time.h"
 
 #include "omp.h"

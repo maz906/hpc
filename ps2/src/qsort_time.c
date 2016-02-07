@@ -1,7 +1,9 @@
 #include "point.h"
+#include "qsort.h"
 #include "qsort_time.h"
 #include "util.h"
 
+#include "stdio.h"
 
 #include "omp.h"
 
