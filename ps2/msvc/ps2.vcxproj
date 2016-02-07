@@ -114,7 +114,7 @@
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -143,11 +143,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.c" />
     <ClCompile Include="..\src\qsort.c" />
+    <ClCompile Include="..\src\qsort_time.c" />
     <ClCompile Include="..\src\scan.c" />
     <ClCompile Include="..\src\scan_test.c" />
     <ClCompile Include="..\src\scan_time.c" />
@@ -158,6 +160,7 @@
     <ClInclude Include="..\include\point.h" />
     <ClInclude Include="..\include\qsort.h" />
     <ClInclude Include="..\include\qsort_test.h" />
+    <ClInclude Include="..\include\qsort_time.h" />
     <ClInclude Include="..\include\scan.h" />
     <ClInclude Include="..\include\scan_test.h" />
     <ClInclude Include="..\include\scan_time.h" />

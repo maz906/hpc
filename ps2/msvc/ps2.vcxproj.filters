@@ -36,6 +36,9 @@
     <ClCompile Include="..\src\scan_time.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\qsort_time.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\qsort.h">
@@ -57,6 +60,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\scan_time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\qsort_time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

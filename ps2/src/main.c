@@ -1,10 +1,12 @@
 #include "qsort_test.h"
+#include "qsort_time.h"
 #include "scan_time.h"
 #include "scan_test.h"
 
 #include "stdio.h"
 
 int INCREMENT;
+int ITERS;
 
 int main(int argv, char** argc) 
 {
@@ -14,8 +16,10 @@ int main(int argv, char** argc)
 		return 1;
 	}
 	INCREMENT = atoi(argc[3]);
-	scan_test(atoi(argc[2]));
+	ITERS = atoi(argc[1]);
+	//scan_test(atoi(argc[2]));
 	//scan_time(atoi(argc[2]));
-	//basic_test(atoi(argc[1]), atoi(argc[2]), atoi(argc[3]));
+	qsort_test(atoi(argc[2]));
+	qsort_time(atoi(argc[2]));
 	return 0;
 }

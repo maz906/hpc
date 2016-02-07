@@ -7,10 +7,13 @@
 #include "scan_test.h"
 #include "util.h"
 
+#include "omp.h"
+
 extern int INCREMENT;
 
 void scan_test(int size)
 {
+	omp_set_num_threads(6);
 	rigor_scan_test(size);
 	basic_scan_test(size, INCREMENT);
 }

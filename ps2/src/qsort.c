@@ -23,22 +23,23 @@ void my_qsort(void* base, int num, int size,
 	//singleton array, so we are done
 	if (num > 1)
 	{
-		//if (num <= 10)
-		//{
-		//	int i; int j;
-		//	for (i = 1; i < num; ++i)
-		//	{
-		//		int* key = (char*)base + i*size;
-		//		j = i - 1;
-		//		while (j >= 0 && (*compar)((char*)base + j*size, key) > 0)
-		//		{
-		//			memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
-		//			j--;
-		//		}
-		//		memcpy((char*)base + (j + 1)*size, key, size);
-		//	}
-		//	return;
-		//}
+		if (num <= 10)
+		{
+			int i; int j;
+			int* key = malloc(sizeof(int));
+			for (i = 1; i < num; ++i)
+			{
+				memcpy(key, (char*)base + i*size, size);
+				j = i - 1;
+				while (j >= 0 && (*compar)((char*)base + j*size, key) >= 0)
+				{
+					memcpy((char*)base + (j + 1)*size, (char*)base + j*size, size);
+					j--;
+				}
+				memcpy((char*)base + (j + 1)*size, key, size);
+			}
+			return;
+		}
 
 		//pivot
 		int div = num / 3;
@@ -125,14 +126,12 @@ void my_qsort(void* base, int num, int size,
 
 void select_lower(void* base, int num, int size, void* pivot, int* swappable, int (*compar)(const void*, const void*))
 {
-
 	int i;
 	int* scan = (int*) malloc(num * sizeof(int));	
 	#pragma omp parallel for
 	for (i = 0; i < num; ++i)
 		scan[i] = ((*compar)((char*) base + size*i, pivot) == -1) ? 1 : 0;
-	genericScan(scan, num, sizeof(int), &addition);
-
+	slowScan(scan, num, sizeof(int), &addition);
 	memcpy(swappable, &scan[num - 1], sizeof(int));
 	#pragma omp parallel for num_threads(1)
 	for (i = 0; i < num; ++i)
