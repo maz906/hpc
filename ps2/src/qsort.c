@@ -163,7 +163,7 @@ void partition_inplace(void* base, size_t num, size_t size, void* pivot, int* sw
 	int swapp = 0;
 	*swappable = thread_scan_sums[procs];
 	for (int i = 0; i < num; ++i)
-		if ((*compar)((char*)base + size*i, pivot) == -1 && swapp < swappable)
+		if ((*compar)((char*)base + size*i, pivot) == -1) 
 		{
 			swap((char*)base + (swapp++)*size, (char*)base + i*size, size);
 		}

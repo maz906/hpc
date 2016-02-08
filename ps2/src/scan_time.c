@@ -13,7 +13,7 @@ extern int ITERS;
 void scan_time(int size)
 {
 	scale_scan_time(size, 16);
-	omp_set_num_threads(6);
+	omp_set_num_threads(24);
 	basic_scan_time(size, INCREMENT, ITERS);
 }
 
@@ -37,8 +37,11 @@ void basic_scan_time(int size, int increment, int times)
 	Point int_time_single, double_time_single, long_time_single, point_time_single, float_time_single, vec_time_single;
 	for (j = increment; j <= size; j += increment)
 	{
+		printf("Scanning size %d\n", j);
 		for (i = 0; i < times; ++i)
 		{
+			if (i % 10 == 0)
+				printf("%d-th iteration...\n", i);
 			rand_int = random_int_array(j);
 			rand_double = random_double_array(j);
 			rand_float = random_float_array(j);

@@ -1,0 +1,1 @@
+Start by running build.sh. If you want to time the code, execute run.sh. If you want to test the code, execute test.sh. Either of these, executed without three arguments, will tell you to specify the number of iterations (to average timing data over), the maximum problem size and the increments to move toward that problem size.
