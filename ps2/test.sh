@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./bin/test_qsort $1 $2 $3
+./bin/main_test $1 $2 $3

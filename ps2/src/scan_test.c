@@ -1,46 +1,59 @@
 #include "assert.h"
 #include "stdlib.h"
+#include "stdbool.h"
 #include "string.h"
 
+#include "scan.h"
 #include "scan_test.h"
-#include "qsort.h"
 #include "util.h"
 
-void* slowScan(void* base, size_t num, size_t size, void* (*oper)(void *x1, void *x2))
-{
-	int i;
-	void* scanned = calloc(num, size);
-	memcpy(scanned, base, size);
-	for (i = 1; i < num; ++i)
-	{
-		int* add = (*oper)((char*)scanned + (i - 1)*size, (char*)base + i*size);
-		memcpy((char*)scanned + i*size, add, size);
-		free(add);
-	}
-	return scanned;
-}
+#include "omp.h"
+
+extern int INCREMENT;
 
 void scan_test(int size)
 {
-	basic_scan_test(size);
+	omp_set_num_threads(6);
+	rigor_scan_test(size);
+	basic_scan_test(size, INCREMENT);
 }
-
-void basic_scan_test(int size)
+/**
+  * Tests every single size from min(10000, size).
+  *
+  */
+void rigor_scan_test(int size)
 {
-	size = min(20000, size);
+	size = (10000 < size) ? 10000 : size;
 	int i;
-	#pragma omp parallel for
-	for (i = 1; i <= size; ++i)
+	for (i = 1; i <= size; i += 10)
 	{
 		printf("Testing prefix sum for size: %d\n", i);
 		int* ones = random_int_array(i);
 		int* ones_dup = duplicate_array(ones, i, sizeof(int));
+		genericScan(ones, i, sizeof(int), &addition);
+		slowScan(ones_dup, i, sizeof(int), &addition);
 		assert(are_equal(ones, ones_dup, i, sizeof(int), &compar_int));
-		int* scanned = genericScan(ones, i, sizeof(int), &addition);
-		free(ones);
-		int* slow_scanned = slowScan(ones_dup, i, sizeof(int), &addition);
-		free(ones_dup);
-		assert(are_equal(scanned, slow_scanned, i, sizeof(int), &compar_int));
-		free(scanned); free(slow_scanned);
+		free(ones); free(ones_dup);
+	}
+}
+
+/**
+  * To be used for timing
+  *
+  *
+  */
+void basic_scan_test(int size, int increment)
+{
+	int i; int* temp_ones; int* temp_ones_dup;
+	for (i = increment; i <= size; i += increment)
+	{
+
+		printf("Testing prefix sum for size: %d\n", i);
+		int* ones = random_int_array(i);
+		int* ones_dup = (int*) duplicate_array(ones, i, sizeof(int));
+		genericScan(ones, i, sizeof(int), &addition);
+		slowScan(ones_dup, i, sizeof(int), &addition);
+		assert(are_equal(ones, ones_dup, i, sizeof(int), &compar_int));
+		free(ones); free(ones_dup);
 	}
 }

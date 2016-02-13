@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./test.sh $1 $2 $3
+./bin/main_time $1 $2 $3
