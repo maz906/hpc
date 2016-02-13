@@ -1,0 +1,33 @@
+(int) array_size: 1000000, sort_time (ms): 510
+(double) array_size: 1000000, sort_time (ms): 620
+(float) array_size: 1000000, sort_time (ms): 350
+(long) array_size: 1000000, sort_time (ms): 360
+(point) array_size: 1000000, sort_time (ms): 440
+(int) array_size: 1000000, sort_time_std (ms): 2410
+(double) array_size: 1000000, sort_time_std (ms): 330
+(float) array_size: 1000000, sort_time_std (ms): 220
+(long) array_size: 1000000, sort_time_std (ms): 190
+(point) array_size: 1000000, sort_time_std (ms): 310
+
+(int) array_size: 10000000, sort_time (ms): 3550
+(double) array_size: 10000000, sort_time (ms): 3590
+(float) array_size: 10000000, sort_time (ms): 3730
+(long) array_size: 10000000, sort_time (ms): 4040
+(point) array_size: 10000000, sort_time (ms): 5290
+(int) array_size: 10000000, sort_time_std (ms): 1690
+(double) array_size: 10000000, sort_time_std (ms): 2170
+(float) array_size: 10000000, sort_time_std (ms): 1850
+(long) array_size: 10000000, sort_time_std (ms): 2240
+(point) array_size: 10000000, sort_time_std (ms): 3750
+
+(int) array_size: 100000000, sort_time (ms): 31850
+(double) array_size: 100000000, sort_time (ms): 39710
+(float) array_size: 100000000, sort_time (ms): 37610
+(long) array_size: 100000000, sort_time (ms): 44280
+(point) array_size: 100000000, sort_time (ms): 58800
+(int) array_size: 100000000, sort_time_std (ms): 19560
+(double) array_size: 100000000, sort_time_std (ms): 22810
+(float) array_size: 100000000, sort_time_std (ms): 19910
+(long) array_size: 100000000, sort_time_std (ms): 25530
+(point) array_size: 100000000, sort_time_std (ms): 43590
+

@@ -65,10 +65,6 @@ void select_lower(void* base, size_t num, size_t size, void* pivot, size_t* swap
 	for (i = 0; i < num; ++i)
 		if (t[i])
 		{
-
-			printf("Size: %d, idx: %d\n", num, i);
-			//assert((char*)base + (*(scan + i*sizeof(int)) - 1)*size != NULL);
-			//assert((char*)base + i*size != NULL);
 			swap((char*)base + (*(scan + i*sizeof(int)) - 1)*size, (char*)base + i*size, size);
 		}
 	swap(pivot, (char*) base + size*(*swappable), size);
