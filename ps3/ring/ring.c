@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-	int numtasks, rank, i, N, sum = 0;
+	int numtasks, rank, i, j, N, sum = 0;
 	if (argc == 1)
 	{
 		N = 0;
@@ -26,16 +26,16 @@ int main(int argc, char* argv[])
 	} 
 	else
 	{
-		printf("Usage: %s [-N/n] [iterations]", argv[0]);
+		printf("Usage: %s [-N/n] [iterations]\n", argv[0]);
 		return 1;
 	}
 
 	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &num_tasks);
+	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Request reqs;
 	
-	for (int j = 0; j < N; ++j)
+	for (j = 0; j < N; ++j)
 	{
 		//set up the receives
 		for (i = 0; i < numtasks; ++i)
@@ -59,6 +59,6 @@ int main(int argc, char* argv[])
 
 	MPI_Finalize();
 
-	printf("Accumulated sum: %e", sum);
+	printf("Accumulated sum: %e\n", sum);
 	return 0;
 }
