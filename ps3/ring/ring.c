@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
 		{
 			if (rank == i)
 			{
+				//should not be Irecv
 				MPI_Irecv(&sum, 1, MPI_INT, ((i - 1) % numtasks + numtasks) % numtasks, 1, MPI_COMM_WORLD, &reqs);
 			}
 		}
