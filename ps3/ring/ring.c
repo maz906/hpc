@@ -33,32 +33,28 @@ int main(int argc, char* argv[])
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Request reqs;
+	MPI_Status status;
+	MPI_Request req;
 	
 	for (j = 0; j < N; ++j)
 	{
-		//set up the receives
-		for (i = 0; i < numtasks; ++i)
+		if (rank == 0)
 		{
-			if (rank == i)
-			{
-				MPI_Irecv(&sum, 1, MPI_INT, ((i - 1) % numtasks + numtasks) % numtasks, 1, MPI_COMM_WORLD, &reqs);
-			}
+			MPI_Isend(&sum, 1, MPI_INT, rank + 1, j, MPI_COMM_WORLD, &req); 
 		}
 		
-		//increment and send
-		for (i = 0; i < numtasks - 1; ++i)
-		{
-			if (rank == i)
-			{
-				sum += rank;
-				MPI_Isend(&sum, 1, MPI_INT, (i + 1) % numtasks, 1, MPI_COMM_WORLD, &reqs);	
-			}
-		}
+
+		//set up the receives
+		MPI_Recv(&sum, 1, MPI_INT, ((rank - 1) % numtasks + numtasks) % numtasks, j, MPI_COMM_WORLD, &status);
+		sum += rank;
+		MPI_Send(&sum, 1, MPI_INT, (rank + 1) % numtasks, j, MPI_COMM_WORLD);	
+
+		
 	}
 
 	MPI_Finalize();
 
-	printf("Accumulated sum: %e\n", sum);
+	if (rank == 0)
+		printf("Accumulated sum: %d\n", sum);
 	return 0;
 }
