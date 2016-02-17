@@ -85,9 +85,13 @@ int main(int argc, char* argv[])
 
 	
 
-	MPI_Finalize();
 	printf("rank: %d, avg send time: %f ms\n", rank, 1000*send_end/N);
 	printf("rank: %d, avg recv time: %f ms\n", rank, 1000*recv_end/N);
+
+
+	//print the accumulated sum last
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Finalize();
 
 	if (rank == 0)
 		printf("Accumulated sum: %d\n", *sum);
