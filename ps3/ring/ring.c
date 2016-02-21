@@ -6,8 +6,7 @@
 int main(int argc, char* argv[])
 {
 	int numtasks, rank, i, j, N, sum = 0;
-	if (argc == 1)
-	{
+	if (argc == 1) {
 		N = 0;
 	}
 	else if (argc == 3)
